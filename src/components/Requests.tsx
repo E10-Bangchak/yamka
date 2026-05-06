@@ -398,13 +398,13 @@ export default function Requests({ member }: RequestsProps) {
         )}
       </div>
 
-      {/* History — approved requests */}
+      {/* History — all completed transactions */}
       {history.length > 0 && (
         <div className="space-y-3">
           <div className="flex items-center space-x-2">
             <History size={14} className="text-gray-400" />
-            <h3 className="text-sm font-bold text-gray-700">ประวัติที่อนุมัติแล้ว</h3>
-            <span className="text-[10px] text-gray-400">(30 รายการล่าสุด)</span>
+            <h3 className="text-sm font-bold text-gray-700">ประวัติการทำรายการ</h3>
+            <span className="text-[10px] text-gray-400">(60 รายการล่าสุด)</span>
           </div>
           {history.map(req => <HistoryCard key={req.id} req={req} />)}
         </div>
