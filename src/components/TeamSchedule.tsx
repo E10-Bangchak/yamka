@@ -305,9 +305,15 @@ export default function TeamSchedule({ member, isAdmin, memberMode = false }: Te
 
   useEffect(() => { setConfirmReverse(false); }, [swapDetail?.id]);
 
+  const [reversing, setReversing] = useState(false);
+
   const handleReverseSwapDirect = async (sw: SwapRequest) => {
+    if (reversing) return;
+    setReversing(true);
     try {
       const batch = writeBatch(db);
+
+      // Revert requester's date to original shift
       batch.set(doc(db, 'shifts', `${sw.requesterId}_${sw.requesterDate}`), {
         memberId: sw.requesterId, date: sw.requesterDate,
         shiftCode: sw.requesterShift,
@@ -315,6 +321,8 @@ export default function TeamSchedule({ member, isAdmin, memberMode = false }: Te
         manualMark: deleteField(),
         updatedAt: new Date().toISOString(),
       } as any, { merge: true });
+
+      // Revert target's date
       if (sw.targetId && sw.targetDate) {
         if (sw.type === 'swap' && sw.targetShift) {
           batch.set(doc(db, 'shifts', `${sw.targetId}_${sw.targetDate}`), {
@@ -325,20 +333,31 @@ export default function TeamSchedule({ member, isAdmin, memberMode = false }: Te
             updatedAt: new Date().toISOString(),
           } as any, { merge: true });
         } else {
+          // cover/cover_holiday: target's doc was created during approval, delete it
           batch.delete(doc(db, 'shifts', `${sw.targetId}_${sw.targetDate}`));
         }
       }
+
+      // Delete return-date docs created during approval
       if (sw.returnDate) {
         batch.delete(doc(db, 'shifts', `${sw.requesterId}_${sw.returnDate}`));
         if (sw.targetId) batch.delete(doc(db, 'shifts', `${sw.targetId}_${sw.returnDate}`));
       }
+
       batch.update(doc(db, 'swapRequests', sw.id), { status: 'reversed' });
       await batch.commit();
+
+      // Optimistic update: immediately remove from local state so green dot disappears
+      // without waiting for Firestore listener to fire
+      setApprovedSwaps(prev => prev.filter(s => s.id !== sw.id));
       setSwapDetail(null);
+      setConfirmReverse(false);
       toast.success('คืนกะเดิมเรียบร้อยแล้ว');
     } catch (err: any) {
       console.error('[handleReverseSwapDirect]', err);
-      toast.error(`ผิดพลาด: ${err?.message || 'unknown'}`);
+      toast.error(`คืนกะไม่สำเร็จ: ${err?.code || err?.message || 'unknown'}`);
+    } finally {
+      setReversing(false);
     }
   };
 
