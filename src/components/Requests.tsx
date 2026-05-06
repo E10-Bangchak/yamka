@@ -26,26 +26,23 @@ export default function Requests({ member }: RequestsProps) {
   const [history, setHistory] = useState<SwapRequest[]>([]);
 
   useEffect(() => {
-    const q1 = query(
-      collection(db, 'swapRequests'),
-      where('targetId', '==', member.id),
-      where('status', '==', 'pending')
-    );
-    const q2 = query(
-      collection(db, 'swapRequests'),
-      where('requesterId', '==', member.id),
-      where('status', '==', 'pending')
-    );
     const mkQ = (field: 'requesterId' | 'targetId', status: string) =>
       query(collection(db, 'swapRequests'), where(field, '==', member.id), where('status', '==', status));
 
-    const unsub1 = onSnapshot(mkQ('targetId', 'pending'), snap =>
-      setIncoming(snap.docs.map(d => ({ id: d.id, ...d.data() } as SwapRequest))
-        .sort((a, b) => b.createdAt.localeCompare(a.createdAt)))
+    const onErr = (label: string) => (err: Error) =>
+      console.error(`[Requests:${label}]`, err.message);
+
+    const unsub1 = onSnapshot(
+      mkQ('targetId', 'pending'),
+      snap => setIncoming(snap.docs.map(d => ({ id: d.id, ...d.data() } as SwapRequest))
+        .sort((a, b) => b.createdAt.localeCompare(a.createdAt))),
+      onErr('incoming')
     );
-    const unsub2 = onSnapshot(mkQ('requesterId', 'pending'), snap =>
-      setOutgoing(snap.docs.map(d => ({ id: d.id, ...d.data() } as SwapRequest))
-        .sort((a, b) => b.createdAt.localeCompare(a.createdAt)))
+    const unsub2 = onSnapshot(
+      mkQ('requesterId', 'pending'),
+      snap => setOutgoing(snap.docs.map(d => ({ id: d.id, ...d.data() } as SwapRequest))
+        .sort((a, b) => b.createdAt.localeCompare(a.createdAt))),
+      onErr('outgoing')
     );
 
     let buckets: Record<string, SwapRequest[]> = {
@@ -59,10 +56,11 @@ export default function Requests({ member }: RequestsProps) {
       setHistory(unique.sort((a, b) => b.createdAt.localeCompare(a.createdAt)).slice(0, 60));
     };
     const listen = (key: string, field: 'requesterId' | 'targetId', status: string) =>
-      onSnapshot(mkQ(field, status), snap => {
-        buckets[key] = snap.docs.map(d => ({ id: d.id, ...d.data() } as SwapRequest));
-        mergeHistory();
-      });
+      onSnapshot(
+        mkQ(field, status),
+        snap => { buckets[key] = snap.docs.map(d => ({ id: d.id, ...d.data() } as SwapRequest)); mergeHistory(); },
+        onErr(key)
+      );
 
     const unsub3 = listen('approvedReq', 'requesterId', 'approved');
     const unsub4 = listen('approvedTgt', 'targetId', 'approved');
