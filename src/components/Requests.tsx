@@ -75,9 +75,11 @@ export default function Requests({ member }: RequestsProps) {
   const handleAction = async (req: SwapRequest, action: 'approved' | 'rejected') => {
     try {
       const batch = writeBatch(db);
-      batch.update(doc(db, 'swapRequests', req.id), { status: action });
-
       const isReverse = !!(req as any).isReverseOf;
+      // Reverse swap requests that are "approved" should be stored as 'reversed'
+      // so they don't appear as active swaps (green dots) in TeamSchedule
+      const finalStatus = (action === 'approved' && isReverse) ? 'reversed' : action;
+      batch.update(doc(db, 'swapRequests', req.id), { status: finalStatus });
 
       if (action === 'approved') {
         if (req.type === 'swap' && req.targetId && req.targetDate) {
