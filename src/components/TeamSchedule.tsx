@@ -896,8 +896,9 @@ export default function TeamSchedule({ member, isAdmin, memberMode = false }: Te
                         ยกเลิก
                       </button>
                       <button onClick={() => handleReverseSwapDirect(swapDetail)}
-                        className="flex-1 py-2 text-sm text-white bg-blue-600 hover:bg-blue-700 rounded-lg font-bold transition-colors">
-                        ยืนยัน
+                        disabled={reversing}
+                        className="flex-1 py-2 text-sm text-white bg-blue-600 hover:bg-blue-700 rounded-lg font-bold transition-colors disabled:opacity-60">
+                        {reversing ? 'กำลังคืน...' : 'ยืนยัน'}
                       </button>
                     </div>
                   </div>
