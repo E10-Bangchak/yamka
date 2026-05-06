@@ -74,7 +74,13 @@ export default function TeamSchedule({ member, isAdmin, memberMode = false }: Te
     });
     const unsubSwaps = onSnapshot(
       query(collection(db, 'swapRequests'), where('status', '==', 'approved')),
-      snap => setApprovedSwaps(snap.docs.map(d => ({ id: d.id, ...d.data() } as SwapRequest)))
+      snap => setApprovedSwaps(
+        snap.docs
+          .map(d => ({ id: d.id, ...d.data() } as SwapRequest))
+          // exclude reverse-swap-requests (isReverseOf set) — they revert shifts,
+          // not create new active ones; shifts are already written to Firestore
+          .filter(sw => !(sw as any).isReverseOf)
+      )
     );
     const unsubProps = onSnapshot(collection(db, 'shiftProperties'), snap => {
       setShiftProps(snap.docs.map(d => ({ id: d.id, ...d.data() } as ShiftProperty)));
