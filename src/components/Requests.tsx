@@ -367,7 +367,7 @@ export default function Requests({ member }: RequestsProps) {
 
   return (
     <div className="space-y-6">
-      <h2 className="text-2xl font-bold text-gray-800">คำขอสลับกะ</h2>
+      <h2 className="text-2xl font-bold text-gray-800">ประวัติการทำรายการ</h2>
 
       {/* Incoming — needs action */}
       <div className="space-y-3">
