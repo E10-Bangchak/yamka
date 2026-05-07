@@ -69,6 +69,50 @@ export default function Members() {
     return () => { unsubMembers(); unsubTemplates(); };
   }, []);
 
+  const currentYear = today.getFullYear();
+  const yearStart = `${currentYear}-01-01`;
+  const todayStr = format(today, 'yyyy-MM-dd');
+
+  useEffect(() => {
+    if (viewMode !== 'quota') return;
+    setQuotaLoading(true);
+    const q = query(
+      collection(db, 'shifts'),
+      where('date', '>=', yearStart),
+      where('date', '<=', todayStr)
+    );
+    const unsub = onSnapshot(q, snap => {
+      setYearShifts(snap.docs.map(d => ({ id: d.id, ...d.data() } as Shift)));
+      setQuotaLoading(false);
+    });
+    return () => unsub();
+  }, [viewMode]);
+
+  const usageMap = useMemo(() => {
+    const map = new Map<string, { A: number; H: number }>();
+    for (const s of yearShifts) {
+      if (s.shiftCode === 'A' || s.shiftCode === 'H') {
+        const curr = map.get(s.memberId) || { A: 0, H: 0 };
+        if (s.shiftCode === 'A') curr.A++;
+        else curr.H++;
+        map.set(s.memberId, curr);
+      }
+    }
+    return map;
+  }, [yearShifts]);
+
+  const handleSaveQuota = async () => {
+    if (!editingQuota) return;
+    try {
+      await updateDoc(doc(db, 'members', editingQuota.id), {
+        quotaA: quotaValues.quotaA,
+        quotaH: quotaValues.quotaH,
+      });
+      toast.success('บันทึกโควตาเรียบร้อย');
+      setEditingQuota(null);
+    } catch { toast.error('เกิดข้อผิดพลาด'); }
+  };
+
   const firstOfMonthStr = format(firstOfMonth, 'yyyy-MM-dd');
   const monthLabel = format(firstOfMonth, 'MMMM yyyy', { locale: th });
 
