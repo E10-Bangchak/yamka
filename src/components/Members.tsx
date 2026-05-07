@@ -512,74 +512,78 @@ export default function Members() {
         );
       })()}
 
-      {/* Members grouped by position */}
+      {/* Members grouped by station → sorted by position */}
       {viewMode === 'members' && (() => {
-        const knownPositions = ['SS', 'AStS', 'SP'];
+        const posOrder = ['SS', 'AStS', 'SP'];
         const normalize = (p?: string) => (p || '').replace(/\.$/, '').trim();
-        const groups = [
-          { pos: 'SS', label: 'นายสถานี (SS)', badge: 'bg-orange-50 text-orange-600 border-orange-200' },
-          { pos: 'AStS', label: 'ผู้ช่วยนายสถานี (AStS)', badge: 'bg-cyan-50 text-cyan-600 border-cyan-200' },
-          { pos: 'SP', label: 'เจ้าหน้าที่สถานี (SP)', badge: 'bg-purple-50 text-purple-600 border-purple-200' },
-          { pos: '__other__', label: 'ไม่ระบุตำแหน่ง', badge: 'bg-gray-50 text-gray-500 border-gray-200' },
-        ];
-        return groups.map(({ pos, label, badge }) => {
-        const group = pos === '__other__'
-          ? members.filter(m => !knownPositions.includes(normalize(m.position)))
-          : members.filter(m => normalize(m.position) === pos);
-        if (group.length === 0) return null;
-        return (
-          <div key={pos || 'none'} className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
-            <div className="px-5 py-3 border-b border-gray-100 bg-gray-50 flex items-center space-x-2">
-              <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold border ${badge}`}>{pos || '—'}</span>
-              <span className="text-xs font-bold text-gray-600">{label}</span>
-              <span className="ml-auto text-[10px] text-gray-400">{group.length} คน</span>
-            </div>
-            <table className="w-full text-left">
-              <thead className="bg-white border-b border-gray-100">
-                <tr>
-                  <th className="px-5 py-3 text-[10px] font-bold text-gray-400 uppercase">ชื่อ-นามสกุล</th>
-                  <th className="px-5 py-3 text-[10px] font-bold text-gray-400 uppercase">สถานี / โซน</th>
-                  <th className="px-5 py-3 text-[10px] font-bold text-gray-400 uppercase">สิทธิ์</th>
-                  <th className="px-5 py-3 text-[10px] font-bold text-gray-400 uppercase text-right">จัดการ</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-gray-50">
-                {group.map((m) => (
-                  <tr key={m.id} className="hover:bg-gray-50 transition-colors">
-                    <td className="px-5 py-3">
-                      <p className="font-medium text-gray-800 text-sm">{m.name}</p>
-                      {m.empId && (
-                        <p className="text-[10px] text-orange-500 font-mono">รหัส: {m.empId}</p>
-                      )}
-                      <p className="text-[10px] text-gray-400 font-mono">{m.uid}</p>
-                    </td>
-                    <td className="px-5 py-3">
-                      <p className="text-sm text-gray-700">{m.station}</p>
-                      <p className="text-[10px] text-gray-400">{m.zone}</p>
-                    </td>
-                    <td className="px-5 py-3">
-                      <button
-                        onClick={() => toggleRole(m)}
-                        className={`flex items-center space-x-1 px-2 py-1 rounded-full text-[10px] font-bold uppercase border ${
-                          m.role === 'admin' ? 'bg-orange-50 text-orange-600 border-orange-200' : 'bg-gray-50 text-gray-500 border-gray-200'
-                        }`}
-                      >
-                        {m.role === 'admin' ? <Shield size={12} /> : <User size={12} />}
-                        <span>{m.role}</span>
-                      </button>
-                    </td>
-                    <td className="px-5 py-3 text-right">
-                      <button onClick={() => openModal(m)} className="p-2 text-gray-400 hover:text-orange-600 transition-colors">
-                        <Edit2 size={18} />
-                      </button>
-                    </td>
+        const posRank = (p?: string) => { const i = posOrder.indexOf(normalize(p)); return i >= 0 ? i : 99; };
+        const posBadge = (p?: string) => {
+          const pos = normalize(p);
+          if (pos === 'SS')   return 'bg-orange-50 text-orange-600 border-orange-200';
+          if (pos === 'AStS') return 'bg-cyan-50 text-cyan-600 border-cyan-200';
+          if (pos === 'SP')   return 'bg-purple-50 text-purple-600 border-purple-200';
+          return 'bg-gray-50 text-gray-500 border-gray-200';
+        };
+
+        const stationMap = new Map<string, Member[]>();
+        for (const m of members) {
+          const key = m.station || '—';
+          if (!stationMap.has(key)) stationMap.set(key, []);
+          stationMap.get(key)!.push(m);
+        }
+        const stations = [...stationMap.keys()].sort((a, b) => a.localeCompare(b, 'th'));
+
+        return stations.map(station => {
+          const group = [...stationMap.get(station)!].sort((a, b) => posRank(a.position) - posRank(b.position));
+          return (
+            <div key={station} className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
+              <div className="px-5 py-3 border-b border-gray-100 bg-gray-50 flex items-center space-x-2">
+                <span className="text-sm font-bold text-gray-700">{station}</span>
+                <span className="ml-auto text-[10px] text-gray-400">{group.length} คน</span>
+              </div>
+              <table className="w-full text-left">
+                <thead className="bg-white border-b border-gray-100">
+                  <tr>
+                    <th className="px-5 py-3 text-[10px] font-bold text-gray-400 uppercase">ชื่อ-นามสกุล</th>
+                    <th className="px-5 py-3 text-[10px] font-bold text-gray-400 uppercase">ตำแหน่ง</th>
+                    <th className="px-5 py-3 text-[10px] font-bold text-gray-400 uppercase">สิทธิ์</th>
+                    <th className="px-5 py-3 text-[10px] font-bold text-gray-400 uppercase text-right">จัดการ</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        );
-      });
+                </thead>
+                <tbody className="divide-y divide-gray-50">
+                  {group.map(m => (
+                    <tr key={m.id} className="hover:bg-gray-50 transition-colors">
+                      <td className="px-5 py-3">
+                        <p className="font-medium text-gray-800 text-sm">{m.name}</p>
+                        {m.empId && <p className="text-[10px] text-orange-500 font-mono">รหัส: {m.empId}</p>}
+                        <p className="text-[10px] text-gray-400 font-mono">{m.uid}</p>
+                      </td>
+                      <td className="px-5 py-3">
+                        <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold border ${posBadge(m.position)}`}>
+                          {normalize(m.position) || '—'}
+                        </span>
+                      </td>
+                      <td className="px-5 py-3">
+                        <button onClick={() => toggleRole(m)}
+                          className={`flex items-center space-x-1 px-2 py-1 rounded-full text-[10px] font-bold uppercase border ${
+                            m.role === 'admin' ? 'bg-orange-50 text-orange-600 border-orange-200' : 'bg-gray-50 text-gray-500 border-gray-200'
+                          }`}>
+                          {m.role === 'admin' ? <Shield size={12} /> : <User size={12} />}
+                          <span>{m.role}</span>
+                        </button>
+                      </td>
+                      <td className="px-5 py-3 text-right">
+                        <button onClick={() => openModal(m)} className="p-2 text-gray-400 hover:text-orange-600 transition-colors">
+                          <Edit2 size={18} />
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          );
+        });
       })()}
 
       {/* Quota Edit Modal */}
