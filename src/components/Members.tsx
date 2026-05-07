@@ -408,14 +408,24 @@ export default function Members() {
 
       {/* ===== QUOTA VIEW ===== */}
       {viewMode === 'quota' && (() => {
-        const knownPositions = ['SS', 'AStS', 'SP'];
+        const posOrder = ['SS', 'AStS', 'SP'];
         const normalize = (p?: string) => (p || '').replace(/\.$/, '').trim();
-        const groups = [
-          { pos: 'SS', badge: 'bg-orange-50 text-orange-600 border-orange-200' },
-          { pos: 'AStS', badge: 'bg-cyan-50 text-cyan-600 border-cyan-200' },
-          { pos: 'SP', badge: 'bg-purple-50 text-purple-600 border-purple-200' },
-          { pos: '__other__', badge: 'bg-gray-50 text-gray-500 border-gray-200' },
-        ];
+        const posRank = (p?: string) => { const i = posOrder.indexOf(normalize(p)); return i >= 0 ? i : 99; };
+        const posBadge = (p?: string) => {
+          const pos = normalize(p);
+          if (pos === 'SS')   return 'bg-orange-50 text-orange-600 border-orange-200';
+          if (pos === 'AStS') return 'bg-cyan-50 text-cyan-600 border-cyan-200';
+          if (pos === 'SP')   return 'bg-purple-50 text-purple-600 border-purple-200';
+          return 'bg-gray-50 text-gray-500 border-gray-200';
+        };
+
+        const stationMap = new Map<string, Member[]>();
+        for (const m of members) {
+          const key = m.station || '—';
+          if (!stationMap.has(key)) stationMap.set(key, []);
+          stationMap.get(key)!.push(m);
+        }
+        const stations = [...stationMap.keys()].sort((a, b) => a.localeCompare(b, 'th'));
 
         const QuotaBar = ({ used, quota, colorUsed, colorOver }: { used: number; quota: number; colorUsed: string; colorOver: string }) => {
           const pct = quota > 0 ? Math.min(100, (used / quota) * 100) : 0;
@@ -436,15 +446,12 @@ export default function Members() {
               {quotaLoading && <span className="text-orange-500">กำลังโหลด...</span>}
             </div>
 
-            {groups.map(({ pos, badge }) => {
-              const group = pos === '__other__'
-                ? members.filter(m => !knownPositions.includes(normalize(m.position)))
-                : members.filter(m => normalize(m.position) === pos);
-              if (group.length === 0) return null;
+            {stations.map(station => {
+              const group = [...stationMap.get(station)!].sort((a, b) => posRank(a.position) - posRank(b.position));
               return (
-                <div key={pos} className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
+                <div key={station} className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
                   <div className="px-4 py-2.5 border-b border-gray-100 bg-gray-50 flex items-center gap-2">
-                    <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold border ${badge}`}>{pos === '__other__' ? '—' : pos}</span>
+                    <span className="text-sm font-bold text-gray-700">{station}</span>
                     <span className="text-xs text-gray-400 ml-auto">{group.length} คน</span>
                   </div>
                   <div className="divide-y divide-gray-50">
@@ -460,7 +467,9 @@ export default function Members() {
                         <div key={m.id} className="px-4 py-3 flex items-start gap-4">
                           <div className="flex-1 min-w-0">
                             <p className="text-sm font-bold text-gray-800 truncate">{m.name}</p>
-                            {m.station && <p className="text-[10px] text-gray-400">{m.station}</p>}
+                            <span className={`inline-block mt-0.5 px-1.5 py-0.5 rounded-full text-[9px] font-bold border ${posBadge(m.position)}`}>
+                              {normalize(m.position) || '—'}
+                            </span>
                           </div>
 
                           {/* A quota */}
