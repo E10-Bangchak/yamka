@@ -36,6 +36,13 @@ export default function Members() {
   const [switchCycleStart, setSwitchCycleStart] = useState('');
   const [switching, setSwitching] = useState(false);
 
+  // Quota management
+  const [viewMode, setViewMode] = useState<'members' | 'quota'>('members');
+  const [yearShifts, setYearShifts] = useState<Shift[]>([]);
+  const [quotaLoading, setQuotaLoading] = useState(false);
+  const [editingQuota, setEditingQuota] = useState<Member | null>(null);
+  const [quotaValues, setQuotaValues] = useState({ quotaA: 0, quotaH: 0 });
+
   // Import from GAS
   const [showImportModal, setShowImportModal] = useState(false);
   const [gasUrl, setGasUrl] = useState('');
