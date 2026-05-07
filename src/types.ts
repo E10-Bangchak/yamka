@@ -17,6 +17,8 @@ export interface Member {
   quotaA: number;
   quotaH: number;
   quotaX: number;
+  initialUsedA?: number; // วันที่ใช้ก่อนเข้าระบบ (A)
+  initialUsedH?: number; // วันที่ใช้ก่อนเข้าระบบ (H)
   shiftPattern: string; // Comma separated codes
   cycleStartDate: string; // YYYY-MM-DD
   role: 'admin' | 'member';
