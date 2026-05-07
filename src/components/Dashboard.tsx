@@ -324,7 +324,7 @@ export default function Dashboard({ member }: DashboardProps) {
                       <span className="block text-[8px] text-gray-400 line-through leading-tight">{original === 'XO' ? 'X' : original}</span>
                     )}
                     {notes.get(dateStr) && (
-                      <span className="block text-[7px] text-indigo-500 leading-tight truncate w-full mt-0.5">📝 {notes.get(dateStr)}</span>
+                      <span className="block text-[7px] text-indigo-500 leading-tight truncate w-full mt-0.5">{notes.get(dateStr)}</span>
                     )}
                   </div>
                 );
