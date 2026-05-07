@@ -12,7 +12,7 @@ export default defineConfig(({mode}) => {
       react(),
       tailwindcss(),
       VitePWA({
-        registerType: 'autoUpdate',
+        registerType: 'prompt',
         includeAssets: ['icon-192.png', 'icon-512.png', 'icon-180.png'],
         manifest: {
           name: 'ระบบยำกะผี',
