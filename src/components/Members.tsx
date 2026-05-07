@@ -164,6 +164,8 @@ export default function Members() {
     data.quotaA = Number(data.quotaA);
     data.quotaH = Number(data.quotaH);
     data.quotaX = Number(data.quotaX);
+    data.initialUsedA = Number(data.initialUsedA || 0);
+    data.initialUsedH = Number(data.initialUsedH || 0);
     data.shiftPattern = patternInput;
     data.cycleStartDate = cycleStartDate;
 
