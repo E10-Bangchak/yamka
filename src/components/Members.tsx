@@ -488,7 +488,7 @@ export default function Members() {
       })()}
 
       {/* Members grouped by position */}
-      {(() => {
+      {viewMode === 'members' && (() => {
         const knownPositions = ['SS', 'AStS', 'SP'];
         const normalize = (p?: string) => (p || '').replace(/\.$/, '').trim();
         const groups = [
