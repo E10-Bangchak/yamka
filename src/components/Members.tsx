@@ -379,6 +379,114 @@ export default function Members() {
         </div>
       </div>
 
+      {/* View mode tabs */}
+      <div className="flex gap-1 bg-gray-100 p-1 rounded-xl w-fit">
+        <button onClick={() => setViewMode('members')}
+          className={`flex items-center gap-1.5 px-4 py-1.5 rounded-lg text-xs font-bold transition-all ${viewMode === 'members' ? 'bg-white shadow text-gray-800' : 'text-gray-500 hover:text-gray-700'}`}>
+          <User size={12} />รายชื่อ
+        </button>
+        <button onClick={() => setViewMode('quota')}
+          className={`flex items-center gap-1.5 px-4 py-1.5 rounded-lg text-xs font-bold transition-all ${viewMode === 'quota' ? 'bg-white shadow text-orange-600' : 'text-gray-500 hover:text-gray-700'}`}>
+          <CalendarDays size={12} />โควตาวันหยุด
+        </button>
+      </div>
+
+      {/* ===== QUOTA VIEW ===== */}
+      {viewMode === 'quota' && (() => {
+        const knownPositions = ['SS', 'AStS', 'SP'];
+        const normalize = (p?: string) => (p || '').replace(/\.$/, '').trim();
+        const groups = [
+          { pos: 'SS', badge: 'bg-orange-50 text-orange-600 border-orange-200' },
+          { pos: 'AStS', badge: 'bg-cyan-50 text-cyan-600 border-cyan-200' },
+          { pos: 'SP', badge: 'bg-purple-50 text-purple-600 border-purple-200' },
+          { pos: '__other__', badge: 'bg-gray-50 text-gray-500 border-gray-200' },
+        ];
+
+        const QuotaBar = ({ used, quota, colorUsed, colorOver }: { used: number; quota: number; colorUsed: string; colorOver: string }) => {
+          const pct = quota > 0 ? Math.min(100, (used / quota) * 100) : 0;
+          const over = used > quota;
+          return (
+            <div className="w-full h-1.5 bg-gray-100 rounded-full mt-1">
+              <div className={`h-full rounded-full transition-all ${over ? colorOver : colorUsed}`}
+                style={{ width: `${pct}%` }} />
+            </div>
+          );
+        };
+
+        return (
+          <div className="space-y-4">
+            <div className="flex items-center gap-2 text-xs text-gray-400">
+              <CalendarDays size={12} />
+              <span>นับจากกะที่บันทึกจริง ปี {currentYear} (1 ม.ค. — วันนี้)</span>
+              {quotaLoading && <span className="text-orange-500">กำลังโหลด...</span>}
+            </div>
+
+            {groups.map(({ pos, badge }) => {
+              const group = pos === '__other__'
+                ? members.filter(m => !knownPositions.includes(normalize(m.position)))
+                : members.filter(m => normalize(m.position) === pos);
+              if (group.length === 0) return null;
+              return (
+                <div key={pos} className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
+                  <div className="px-4 py-2.5 border-b border-gray-100 bg-gray-50 flex items-center gap-2">
+                    <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold border ${badge}`}>{pos === '__other__' ? '—' : pos}</span>
+                    <span className="text-xs text-gray-400 ml-auto">{group.length} คน</span>
+                  </div>
+                  <div className="divide-y divide-gray-50">
+                    {group.map(m => {
+                      const usage = usageMap.get(m.id) || { A: 0, H: 0 };
+                      const overA = usage.A > m.quotaA;
+                      const overH = usage.H > m.quotaH;
+                      return (
+                        <div key={m.id} className="px-4 py-3 flex items-start gap-4">
+                          <div className="flex-1 min-w-0">
+                            <p className="text-sm font-bold text-gray-800 truncate">{m.name}</p>
+                            {m.station && <p className="text-[10px] text-gray-400">{m.station}</p>}
+                          </div>
+
+                          {/* A quota */}
+                          <div className="w-24 shrink-0">
+                            <div className="flex items-center justify-between">
+                              <span className="text-[10px] font-bold text-red-500 uppercase">A</span>
+                              {overA && <span className="text-[9px] font-bold text-red-600 bg-red-50 px-1 rounded">เกิน!</span>}
+                            </div>
+                            <p className={`text-sm font-black leading-tight ${overA ? 'text-red-600' : 'text-gray-800'}`}>
+                              {usage.A}<span className="text-[10px] font-normal text-gray-400">/{m.quotaA}</span>
+                            </p>
+                            <QuotaBar used={usage.A} quota={m.quotaA} colorUsed="bg-red-400" colorOver="bg-red-600" />
+                            <p className="text-[9px] text-gray-400 mt-0.5">เหลือ {Math.max(0, m.quotaA - usage.A)} วัน</p>
+                          </div>
+
+                          {/* H quota */}
+                          <div className="w-24 shrink-0">
+                            <div className="flex items-center justify-between">
+                              <span className="text-[10px] font-bold text-pink-500 uppercase">H</span>
+                              {overH && <span className="text-[9px] font-bold text-pink-600 bg-pink-50 px-1 rounded">เกิน!</span>}
+                            </div>
+                            <p className={`text-sm font-black leading-tight ${overH ? 'text-pink-600' : 'text-gray-800'}`}>
+                              {usage.H}<span className="text-[10px] font-normal text-gray-400">/{m.quotaH}</span>
+                            </p>
+                            <QuotaBar used={usage.H} quota={m.quotaH} colorUsed="bg-pink-400" colorOver="bg-pink-600" />
+                            <p className="text-[9px] text-gray-400 mt-0.5">เหลือ {Math.max(0, m.quotaH - usage.H)} วัน</p>
+                          </div>
+
+                          {/* Edit quota button */}
+                          <button
+                            onClick={() => { setEditingQuota(m); setQuotaValues({ quotaA: m.quotaA, quotaH: m.quotaH }); }}
+                            className="p-1.5 text-gray-300 hover:text-orange-500 transition-colors shrink-0 mt-0.5">
+                            <Edit2 size={14} />
+                          </button>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        );
+      })()}
+
       {/* Members grouped by position */}
       {(() => {
         const knownPositions = ['SS', 'AStS', 'SP'];
