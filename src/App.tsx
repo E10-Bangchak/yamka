@@ -20,6 +20,7 @@ import ShiftPatterns from './components/ShiftPatterns';
 import PairGroups from './components/PairGroups';
 import SpecialSchedule from './components/SpecialSchedule';
 import { Toaster, toast } from 'sonner';
+import { useRegisterSW } from 'virtual:pwa-register/react';
 
 export default function App() {
   const [user, setUser] = useState<User | null>(null);
