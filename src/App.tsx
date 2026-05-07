@@ -23,6 +23,16 @@ import { Toaster, toast } from 'sonner';
 import { useRegisterSW } from 'virtual:pwa-register/react';
 
 export default function App() {
+  const { needRefresh: [needRefresh], updateServiceWorker } = useRegisterSW();
+
+  useEffect(() => {
+    if (!needRefresh) return;
+    toast('มีเวอร์ชั่นใหม่พร้อมใช้งาน', {
+      duration: Infinity,
+      action: { label: 'อัปเดตเลย', onClick: () => updateServiceWorker(true) },
+    });
+  }, [needRefresh]);
+
   const [user, setUser] = useState<User | null>(null);
   const [member, setMember] = useState<Member | null>(null);
   const [loading, setLoading] = useState(true);
