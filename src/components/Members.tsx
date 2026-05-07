@@ -70,15 +70,23 @@ export default function Members() {
   }, []);
 
   const currentYear = today.getFullYear();
-  const yearStart = `${currentYear}-01-01`;
   const todayStr = format(today, 'yyyy-MM-dd');
+  // H: calendar year Jan 1–Dec 31
+  const hStart = `${currentYear}-01-01`;
+  const hEnd   = `${currentYear}-12-31`;
+  // A: fiscal year Apr 1–Mar 31 next year
+  const fiscalBase = today.getMonth() >= 3 ? currentYear : currentYear - 1;
+  const aStart = `${fiscalBase}-04-01`;
+  const aEnd   = `${fiscalBase + 1}-03-31`;
+  // Fetch from earliest of hStart / aStart
+  const fetchFrom = aStart < hStart ? aStart : hStart;
 
   useEffect(() => {
     if (viewMode !== 'quota') return;
     setQuotaLoading(true);
     const q = query(
       collection(db, 'shifts'),
-      where('date', '>=', yearStart),
+      where('date', '>=', fetchFrom),
       where('date', '<=', todayStr)
     );
     const unsub = onSnapshot(q, snap => {
@@ -91,10 +99,13 @@ export default function Members() {
   const usageMap = useMemo(() => {
     const map = new Map<string, { A: number; H: number }>();
     for (const s of yearShifts) {
-      if (s.shiftCode === 'A' || s.shiftCode === 'H') {
+      if (s.shiftCode === 'A' && s.date >= aStart && s.date <= aEnd)  {
         const curr = map.get(s.memberId) || { A: 0, H: 0 };
-        if (s.shiftCode === 'A') curr.A++;
-        else curr.H++;
+        curr.A++;
+        map.set(s.memberId, curr);
+      } else if (s.shiftCode === 'H' && s.date >= hStart && s.date <= hEnd) {
+        const curr = map.get(s.memberId) || { A: 0, H: 0 };
+        curr.H++;
         map.set(s.memberId, curr);
       }
     }
@@ -107,6 +118,8 @@ export default function Members() {
       await updateDoc(doc(db, 'members', editingQuota.id), {
         quotaA: quotaValues.quotaA,
         quotaH: quotaValues.quotaH,
+        initialUsedA: quotaValues.initialUsedA,
+        initialUsedH: quotaValues.initialUsedH,
       });
       toast.success('บันทึกโควตาเรียบร้อย');
       setEditingQuota(null);
