@@ -466,7 +466,7 @@ export default function Members() {
                       return (
                         <div key={m.id} className="px-4 py-3 flex items-start gap-4">
                           <div className="flex-1 min-w-0">
-                            <p className="text-sm font-bold text-gray-800 truncate">{m.name}</p>
+                            {(() => { const [fn, ...ln] = m.name.split(' '); return (<><p className="text-sm font-bold text-gray-800">{fn}</p>{ln.length > 0 && <p className="text-sm font-bold text-gray-800">{ln.join(' ')}</p>}</>); })()}
                             <span className={`inline-block mt-0.5 px-1.5 py-0.5 rounded-full text-[9px] font-bold border ${posBadge(m.position)}`}>
                               {normalize(m.position) || '—'}
                             </span>
