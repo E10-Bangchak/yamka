@@ -313,55 +313,54 @@ export default function TeamSchedule({ member, isAdmin, memberMode = false }: Te
 
   const [reversing, setReversing] = useState(false);
 
-  const handleReverseSwapDirect = async (sw: SwapRequest) => {
+  const handleRequestReverse = async (sw: SwapRequest) => {
     if (reversing) return;
     setReversing(true);
     try {
-      const batch = writeBatch(db);
+      const iAmRequester = sw.requesterId === member.id;
+      const otherId = iAmRequester ? sw.targetId! : sw.requesterId;
+      const otherName = iAmRequester ? (sw.targetName || '') : sw.requesterName;
 
-      // Revert requester's date to original shift
-      batch.set(doc(db, 'shifts', `${sw.requesterId}_${sw.requesterDate}`), {
-        memberId: sw.requesterId, date: sw.requesterDate,
-        shiftCode: sw.requesterShift,
-        originalShiftCode: deleteField(),
-        manualMark: deleteField(),
-        updatedAt: new Date().toISOString(),
-      } as any, { merge: true });
+      const myDate = iAmRequester ? sw.requesterDate : (sw.targetDate || sw.requesterDate);
+      const theirDate = iAmRequester ? (sw.targetDate || sw.requesterDate) : sw.requesterDate;
+      const myCurrentShift = getShift(member, myDate);
+      const otherMember = members.find(m => m.id === otherId);
+      const theirCurrentShift = otherMember ? getShift(otherMember, theirDate) : '';
 
-      // Revert target's date
-      if (sw.targetId && sw.targetDate) {
-        if (sw.type === 'swap' && sw.targetShift) {
-          batch.set(doc(db, 'shifts', `${sw.targetId}_${sw.targetDate}`), {
-            memberId: sw.targetId, date: sw.targetDate,
-            shiftCode: sw.targetShift,
-            originalShiftCode: deleteField(),
-            manualMark: deleteField(),
-            updatedAt: new Date().toISOString(),
-          } as any, { merge: true });
-        } else {
-          // cover/cover_holiday: target's doc was created during approval, delete it
-          batch.delete(doc(db, 'shifts', `${sw.targetId}_${sw.targetDate}`));
-        }
-      }
+      const payload: Record<string, unknown> = {
+        requesterId: member.id,
+        requesterName: member.name,
+        targetId: otherId,
+        targetName: otherName,
+        type: sw.type,
+        requesterDate: myDate,
+        requesterShift: myCurrentShift,
+        targetDate: theirDate,
+        targetShift: theirCurrentShift,
+        // Store the original shift of the person who clicked (needed for cover reversal)
+        originalRequesterShift: iAmRequester ? sw.requesterShift : (sw.targetShift || ''),
+        isReverseOf: sw.id,
+        status: 'pending',
+        createdAt: new Date().toISOString(),
+      };
 
-      // Delete return-date docs created during approval
-      if (sw.returnDate) {
-        batch.delete(doc(db, 'shifts', `${sw.requesterId}_${sw.returnDate}`));
-        if (sw.targetId) batch.delete(doc(db, 'shifts', `${sw.targetId}_${sw.returnDate}`));
-      }
+      if (sw.returnDate) payload.returnDate = sw.returnDate;
 
-      batch.update(doc(db, 'swapRequests', sw.id), { status: 'reversed' });
-      await batch.commit();
+      await addDoc(collection(db, 'swapRequests'), payload);
 
-      // Optimistic update: immediately remove from local state so green dot disappears
-      // without waiting for Firestore listener to fire
-      setApprovedSwaps(prev => prev.filter(s => s.id !== sw.id));
+      emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, {
+        subject: `[ระบบยำกะผี] คำขอแลกคืนจาก ${member.name}`,
+        from_name: 'ระบบยำกะผี',
+        to_email: ADMIN_EMAIL,
+        message: `${member.name} ขอแลกคืนกะกับ ${otherName}\nวันที่: ${myDate} (กะ ${myCurrentShift})\n\nตรวจสอบในระบบ: https://gen-lang-client-0528383957.web.app`,
+      }, EMAILJS_PUBLIC_KEY).catch(() => {});
+
       setSwapDetail(null);
       setConfirmReverse(false);
-      toast.success('คืนกะเดิมเรียบร้อยแล้ว');
+      toast.success('ส่งคำขอแลกคืนแล้ว รอการอนุมัติจากคู่แลก');
     } catch (err: any) {
-      console.error('[handleReverseSwapDirect]', err);
-      toast.error(`คืนกะไม่สำเร็จ: ${err?.code || err?.message || 'unknown'}`);
+      console.error('[handleRequestReverse]', err);
+      toast.error(`ส่งคำขอไม่สำเร็จ: ${err?.code || err?.message || 'unknown'}`);
     } finally {
       setReversing(false);
     }
