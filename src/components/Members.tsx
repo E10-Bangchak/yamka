@@ -591,21 +591,40 @@ export default function Members() {
               </div>
               <button onClick={() => setEditingQuota(null)} className="text-gray-400 hover:text-gray-600"><XIcon size={18} /></button>
             </div>
-            <div className="space-y-4">
-              <div>
-                <label className="block text-xs font-bold text-red-500 uppercase mb-1">A — ลาพักร้อน (วัน/ปี)</label>
-                <input type="number" min={0} max={365}
-                  value={quotaValues.quotaA}
-                  onChange={e => setQuotaValues(v => ({ ...v, quotaA: Number(e.target.value) }))}
-                  className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-lg font-bold text-center outline-none focus:ring-2 focus:ring-red-400" />
+            <div className="space-y-3">
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-xs font-bold text-red-500 uppercase mb-1">โควตา A (วัน/ปี)</label>
+                  <input type="number" min={0} max={365}
+                    value={quotaValues.quotaA}
+                    onChange={e => setQuotaValues(v => ({ ...v, quotaA: Number(e.target.value) }))}
+                    className="w-full border border-gray-200 rounded-xl px-3 py-2 text-base font-bold text-center outline-none focus:ring-2 focus:ring-red-400" />
+                </div>
+                <div>
+                  <label className="block text-xs font-bold text-gray-400 uppercase mb-1">A ก่อนเข้าระบบ</label>
+                  <input type="number" min={0} max={365}
+                    value={quotaValues.initialUsedA}
+                    onChange={e => setQuotaValues(v => ({ ...v, initialUsedA: Number(e.target.value) }))}
+                    className="w-full border border-gray-200 rounded-xl px-3 py-2 text-base font-bold text-center outline-none focus:ring-2 focus:ring-red-200" />
+                </div>
               </div>
-              <div>
-                <label className="block text-xs font-bold text-pink-500 uppercase mb-1">H — หยุดนักขัตฤกษ์ (วัน/ปี)</label>
-                <input type="number" min={0} max={365}
-                  value={quotaValues.quotaH}
-                  onChange={e => setQuotaValues(v => ({ ...v, quotaH: Number(e.target.value) }))}
-                  className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-lg font-bold text-center outline-none focus:ring-2 focus:ring-pink-400" />
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-xs font-bold text-pink-500 uppercase mb-1">โควตา H (วัน/ปี)</label>
+                  <input type="number" min={0} max={365}
+                    value={quotaValues.quotaH}
+                    onChange={e => setQuotaValues(v => ({ ...v, quotaH: Number(e.target.value) }))}
+                    className="w-full border border-gray-200 rounded-xl px-3 py-2 text-base font-bold text-center outline-none focus:ring-2 focus:ring-pink-400" />
+                </div>
+                <div>
+                  <label className="block text-xs font-bold text-gray-400 uppercase mb-1">H ก่อนเข้าระบบ</label>
+                  <input type="number" min={0} max={365}
+                    value={quotaValues.initialUsedH}
+                    onChange={e => setQuotaValues(v => ({ ...v, initialUsedH: Number(e.target.value) }))}
+                    className="w-full border border-gray-200 rounded-xl px-3 py-2 text-base font-bold text-center outline-none focus:ring-2 focus:ring-pink-200" />
+                </div>
               </div>
+              <p className="text-[10px] text-gray-400">"ก่อนเข้าระบบ" = วันที่ใช้ไปก่อนเริ่มใช้งานระบบนี้</p>
             </div>
             <div className="flex gap-2 mt-5">
               <button onClick={() => setEditingQuota(null)}
