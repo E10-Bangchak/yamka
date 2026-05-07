@@ -76,76 +76,64 @@ export default function Requests({ member }: RequestsProps) {
     try {
       const batch = writeBatch(db);
       const isReverse = !!(req as any).isReverseOf;
-      // Reverse swap requests that are "approved" should be stored as 'reversed'
-      // so they don't appear as active swaps (green dots) in TeamSchedule
       const finalStatus = (action === 'approved' && isReverse) ? 'reversed' : action;
       batch.update(doc(db, 'swapRequests', req.id), { status: finalStatus });
 
       if (action === 'approved') {
-        if (req.type === 'swap' && req.targetId && req.targetDate) {
-          const reqDoc: any = {
-            memberId: req.requesterId, date: req.requesterDate,
-            shiftCode: req.targetShift,
-            originalShiftCode: isReverse ? deleteField() : req.requesterShift,
-            manualMark: deleteField(),
-            updatedAt: new Date().toISOString(),
-          };
-          batch.set(doc(db, 'shifts', `${req.requesterId}_${req.requesterDate}`), reqDoc, { merge: true });
-          const tgtDoc: any = {
-            memberId: req.targetId, date: req.targetDate,
-            shiftCode: req.requesterShift,
-            originalShiftCode: isReverse ? deleteField() : req.targetShift,
-            manualMark: deleteField(),
-            updatedAt: new Date().toISOString(),
-          };
-          batch.set(doc(db, 'shifts', `${req.targetId}_${req.targetDate}`), tgtDoc, { merge: true });
-          if (isReverse) {
-            batch.update(doc(db, 'swapRequests', (req as any).isReverseOf), { status: 'reversed' });
+        if (isReverse) {
+          // Restore original shifts for both parties
+          if (req.type === 'swap') {
+            batch.set(doc(db, 'shifts', `${req.requesterId}_${req.requesterDate}`), {
+              memberId: req.requesterId, date: req.requesterDate,
+              shiftCode: req.targetShift, // requester's original = target's current
+              originalShiftCode: deleteField(), manualMark: deleteField(),
+              updatedAt: new Date().toISOString(),
+            } as any, { merge: true });
+            if (req.targetId && req.targetDate) {
+              batch.set(doc(db, 'shifts', `${req.targetId}_${req.targetDate}`), {
+                memberId: req.targetId, date: req.targetDate,
+                shiftCode: req.requesterShift, // target's original = requester's current
+                originalShiftCode: deleteField(), manualMark: deleteField(),
+                updatedAt: new Date().toISOString(),
+              } as any, { merge: true });
+            }
+          } else { // cover / cover_holiday
+            const origShift = (req as any).originalRequesterShift || req.requesterShift;
+            batch.set(doc(db, 'shifts', `${req.requesterId}_${req.requesterDate}`), {
+              memberId: req.requesterId, date: req.requesterDate,
+              shiftCode: origShift,
+              originalShiftCode: deleteField(), manualMark: deleteField(),
+              updatedAt: new Date().toISOString(),
+            } as any, { merge: true });
+            if (req.targetId && req.targetDate) {
+              batch.delete(doc(db, 'shifts', `${req.targetId}_${req.targetDate}`));
+            }
           }
+          // Delete returnDate shift docs created during original swap approval
           if (req.returnDate && req.targetId) {
-            batch.set(doc(db, 'shifts', `${req.requesterId}_${req.returnDate}`), {
-              memberId: req.requesterId, date: req.returnDate,
-              shiftCode: req.returnTargetShift || req.requesterShift,
-              manualMark: deleteField(),
-              updatedAt: new Date().toISOString(),
-            } as any, { merge: true });
-            batch.set(doc(db, 'shifts', `${req.targetId}_${req.returnDate}`), {
-              memberId: req.targetId, date: req.returnDate,
-              shiftCode: req.returnShift || 'X',
-              manualMark: deleteField(),
-              updatedAt: new Date().toISOString(),
-            } as any, { merge: true });
+            batch.delete(doc(db, 'shifts', `${req.requesterId}_${req.returnDate}`));
+            batch.delete(doc(db, 'shifts', `${req.targetId}_${req.returnDate}`));
           }
-        } else if (req.type === 'cover' || req.type === 'cover_holiday') {
-          batch.set(doc(db, 'shifts', `${req.requesterId}_${req.requesterDate}`), {
-            memberId: req.requesterId, date: req.requesterDate,
-            shiftCode: 'X', originalShiftCode: req.requesterShift,
-            manualMark: deleteField(),
-            updatedAt: new Date().toISOString(),
-          } as any, { merge: true });
-          if (req.targetId && req.targetDate) {
+          // Mark original swap as reversed
+          batch.update(doc(db, 'swapRequests', (req as any).isReverseOf), { status: 'reversed' });
+        } else {
+          // Normal approval: apply shift changes
+          if (req.type === 'swap' && req.targetId && req.targetDate) {
+            batch.set(doc(db, 'shifts', `${req.requesterId}_${req.requesterDate}`), {
+              memberId: req.requesterId, date: req.requesterDate,
+              shiftCode: req.targetShift,
+              originalShiftCode: req.requesterShift,
+              manualMark: deleteField(),
+              updatedAt: new Date().toISOString(),
+            } as any, { merge: true });
             batch.set(doc(db, 'shifts', `${req.targetId}_${req.targetDate}`), {
               memberId: req.targetId, date: req.targetDate,
-              shiftCode: req.targetShift, isDoubleShift: true,
+              shiftCode: req.requesterShift,
+              originalShiftCode: req.targetShift,
               manualMark: deleteField(),
               updatedAt: new Date().toISOString(),
             } as any, { merge: true });
-          }
-          if (req.returnDate && req.targetId) {
-            if (req.type === 'cover') {
-              batch.set(doc(db, 'shifts', `${req.requesterId}_${req.returnDate}`), {
-                memberId: req.requesterId, date: req.returnDate,
-                shiftCode: req.returnShift, isDoubleShift: true,
-                manualMark: deleteField(),
-                updatedAt: new Date().toISOString(),
-              } as any, { merge: true });
-              batch.set(doc(db, 'shifts', `${req.targetId}_${req.returnDate}`), {
-                memberId: req.targetId, date: req.returnDate,
-                shiftCode: 'X', originalShiftCode: req.returnTargetShift,
-                manualMark: deleteField(),
-                updatedAt: new Date().toISOString(),
-              } as any, { merge: true });
-            } else {
+            if (req.returnDate && req.targetId) {
               batch.set(doc(db, 'shifts', `${req.requesterId}_${req.returnDate}`), {
                 memberId: req.requesterId, date: req.returnDate,
                 shiftCode: req.returnTargetShift || req.requesterShift,
@@ -158,6 +146,50 @@ export default function Requests({ member }: RequestsProps) {
                 manualMark: deleteField(),
                 updatedAt: new Date().toISOString(),
               } as any, { merge: true });
+            }
+          } else if (req.type === 'cover' || req.type === 'cover_holiday') {
+            batch.set(doc(db, 'shifts', `${req.requesterId}_${req.requesterDate}`), {
+              memberId: req.requesterId, date: req.requesterDate,
+              shiftCode: 'X', originalShiftCode: req.requesterShift,
+              manualMark: deleteField(),
+              updatedAt: new Date().toISOString(),
+            } as any, { merge: true });
+            if (req.targetId && req.targetDate) {
+              batch.set(doc(db, 'shifts', `${req.targetId}_${req.targetDate}`), {
+                memberId: req.targetId, date: req.targetDate,
+                shiftCode: req.targetShift, isDoubleShift: true,
+                manualMark: deleteField(),
+                updatedAt: new Date().toISOString(),
+              } as any, { merge: true });
+            }
+            if (req.returnDate && req.targetId) {
+              if (req.type === 'cover') {
+                batch.set(doc(db, 'shifts', `${req.requesterId}_${req.returnDate}`), {
+                  memberId: req.requesterId, date: req.returnDate,
+                  shiftCode: req.returnShift, isDoubleShift: true,
+                  manualMark: deleteField(),
+                  updatedAt: new Date().toISOString(),
+                } as any, { merge: true });
+                batch.set(doc(db, 'shifts', `${req.targetId}_${req.returnDate}`), {
+                  memberId: req.targetId, date: req.returnDate,
+                  shiftCode: 'X', originalShiftCode: req.returnTargetShift,
+                  manualMark: deleteField(),
+                  updatedAt: new Date().toISOString(),
+                } as any, { merge: true });
+              } else {
+                batch.set(doc(db, 'shifts', `${req.requesterId}_${req.returnDate}`), {
+                  memberId: req.requesterId, date: req.returnDate,
+                  shiftCode: req.returnTargetShift || req.requesterShift,
+                  manualMark: deleteField(),
+                  updatedAt: new Date().toISOString(),
+                } as any, { merge: true });
+                batch.set(doc(db, 'shifts', `${req.targetId}_${req.returnDate}`), {
+                  memberId: req.targetId, date: req.returnDate,
+                  shiftCode: req.returnShift || 'X',
+                  manualMark: deleteField(),
+                  updatedAt: new Date().toISOString(),
+                } as any, { merge: true });
+              }
             }
           }
         }
