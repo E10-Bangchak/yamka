@@ -115,10 +115,13 @@ export default function Dashboard({ member }: DashboardProps) {
     } catch { toast.error('เกิดข้อผิดพลาด'); }
   };
 
-  const allDays = eachDayOfInterval({ start: rangeStart, end: rangeEnd });
-  const totalA = allDays.filter(d => getShift(format(d, 'yyyy-MM-dd')).code === 'A').length;
-  const totalH = allDays.filter(d => getShift(format(d, 'yyyy-MM-dd')).code === 'H').length;
-  const totalX = allDays.filter(d => getShift(format(d, 'yyyy-MM-dd')).code === 'X').length;
+  // Quota: count only Firestore-stored A/H shifts from Jan 1 to today (actual used, not projected)
+  const todayStr = format(today, 'yyyy-MM-dd');
+  const totalA = shifts.filter(s => s.shiftCode === 'A' && s.date <= todayStr).length;
+  const totalH = shifts.filter(s => s.shiftCode === 'H' && s.date <= todayStr).length;
+  // X count from pattern over displayed calendar (informational only)
+  const calDays = eachDayOfInterval({ start: calendarStart, end: rangeEnd });
+  const totalX = calDays.filter(d => getShift(format(d, 'yyyy-MM-dd')).code === 'X').length;
 
   const months = Array.from({ length: 12 }, (_, i) => addMonths(today, i));
 
