@@ -39,14 +39,17 @@
 - `cover_holiday` returnDate ≤ เดือนถัดไป
 
 ### ระบบ Reverse (ขอแลกคืน)
-- ทำงานใน **TeamSchedule popup** เท่านั้น (immediate, no approval needed)
+- ทำงานใน **TeamSchedule popup** + ต้องผ่าน **Requests** approval
 - ทั้ง requester และ target กดได้
-- กด "ขอแลกคืน" → confirm → `handleReverseSwapDirect` → batch commit:
-  - `shifts/{req}_{reqDate}` → `shiftCode: requesterShift` (คืนค่าเดิม)
-  - `shifts/{tgt}_{tgtDate}` → `shiftCode: targetShift` (คืนค่าเดิม)
-  - ลบ returnDate docs
-  - `swapRequests/{id}` → `status: 'reversed'`
-  - Optimistic update: ลบจาก `approvedSwaps` state ทันที → วงกลมเขียวหายทันที
+- กด "ขอแลกคืน" → confirm → `handleRequestReverse` → `addDoc` สร้าง pending swapRequest (`isReverseOf: originalSwapId`)
+  - ส่ง email แจ้งเตือนคู่แลก
+  - toast: "ส่งคำขอแลกคืนแล้ว รอการอนุมัติจากคู่แลก"
+- คู่แลกเห็นใน Requests → "รอการอนุมัติจากคุณ" พร้อม badge "แลกคืน"
+- คู่แลกอนุมัติ → `handleAction` (isReverse=true):
+  - swap type: SET shifts กลับเป็น original (requester gets targetShift, target gets requesterShift)
+  - cover type: SET requester กลับเป็น originalRequesterShift, DELETE target's override
+  - DELETE returnDate docs (ถ้ามี)
+  - status reverse request → 'reversed', original swap → 'reversed'
 
 ### Requests (ประวัติการทำรายการ)
 - **รอการอนุมัติจากคุณ** — incoming pending (approve/reject)
