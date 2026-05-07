@@ -592,7 +592,9 @@ export default function TeamSchedule({ member, isAdmin, memberMode = false }: Te
       {/* Member: Step 1 — choose type */}
       {showSwap && swapPopup && (() => {
         const tgtIsOff = OFF_SHIFTS.includes(swapPopup.targetShift);
+        const requesterShiftOnDate = getShiftCode(member, swapPopup.targetDate, allShifts);
         const bothSS = normalizePos(member.position) === 'SS' && normalizePos(swapPopup.targetMember.position) === 'SS';
+        const coverAllowed = bothSS && requesterShiftOnDate !== 'X' && swapPopup.targetShift !== 'X';
         return (
           <div className="fixed inset-0 bg-black/40 z-50 flex items-end md:items-center justify-center p-4"
             onClick={() => setSwapPopup(null)}>
