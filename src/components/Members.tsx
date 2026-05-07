@@ -552,7 +552,7 @@ export default function Members() {
               </div>
               <table className="w-full text-left table-fixed">
                 <colgroup>
-                  <col className="w-[55%]" />
+                  <col className="w-[30%]" />
                   <col className="w-[20%]" />
                   <col className="w-[16%]" />
                   <col className="w-[9%]" />
