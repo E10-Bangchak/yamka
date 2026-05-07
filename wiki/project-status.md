@@ -4,7 +4,7 @@
 
 ## สถานะรวม
 
-**ระบบพร้อมใช้งาน** — Deploy ล่าสุดแล้ว, ระบบ swap/cover/reverse ครบ, Requests เป็นหน้าประวัติ
+**ระบบพร้อมใช้งาน** — Deploy ล่าสุดแล้ว, ระบบ swap/cover/reverse ครบ, ระบบโควตาวันหยุด A/H พร้อม initialUsed
 
 ---
 
