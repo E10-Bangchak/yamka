@@ -41,7 +41,7 @@ export default function Members() {
   const [yearShifts, setYearShifts] = useState<Shift[]>([]);
   const [quotaLoading, setQuotaLoading] = useState(false);
   const [editingQuota, setEditingQuota] = useState<Member | null>(null);
-  const [quotaValues, setQuotaValues] = useState({ quotaA: 0, quotaH: 0 });
+  const [quotaValues, setQuotaValues] = useState({ quotaA: 0, quotaH: 0, initialUsedA: 0, initialUsedH: 0 });
 
   // Import from GAS
   const [showImportModal, setShowImportModal] = useState(false);
