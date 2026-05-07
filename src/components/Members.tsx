@@ -557,6 +557,47 @@ export default function Members() {
       });
       })()}
 
+      {/* Quota Edit Modal */}
+      {editingQuota && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
+          <div className="bg-white w-full max-w-xs rounded-2xl p-6 shadow-2xl">
+            <div className="flex items-center justify-between mb-4">
+              <div>
+                <h3 className="text-base font-bold text-gray-800">แก้ไขโควตาวันหยุด</h3>
+                <p className="text-xs text-gray-500">{editingQuota.name}</p>
+              </div>
+              <button onClick={() => setEditingQuota(null)} className="text-gray-400 hover:text-gray-600"><XIcon size={18} /></button>
+            </div>
+            <div className="space-y-4">
+              <div>
+                <label className="block text-xs font-bold text-red-500 uppercase mb-1">A — ลาพักร้อน (วัน/ปี)</label>
+                <input type="number" min={0} max={365}
+                  value={quotaValues.quotaA}
+                  onChange={e => setQuotaValues(v => ({ ...v, quotaA: Number(e.target.value) }))}
+                  className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-lg font-bold text-center outline-none focus:ring-2 focus:ring-red-400" />
+              </div>
+              <div>
+                <label className="block text-xs font-bold text-pink-500 uppercase mb-1">H — หยุดนักขัตฤกษ์ (วัน/ปี)</label>
+                <input type="number" min={0} max={365}
+                  value={quotaValues.quotaH}
+                  onChange={e => setQuotaValues(v => ({ ...v, quotaH: Number(e.target.value) }))}
+                  className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-lg font-bold text-center outline-none focus:ring-2 focus:ring-pink-400" />
+              </div>
+            </div>
+            <div className="flex gap-2 mt-5">
+              <button onClick={() => setEditingQuota(null)}
+                className="flex-1 py-2.5 text-sm text-gray-500 bg-gray-100 hover:bg-gray-200 rounded-xl font-medium transition-colors">
+                ยกเลิก
+              </button>
+              <button onClick={handleSaveQuota}
+                className="flex-1 py-2.5 text-sm text-white bg-orange-600 hover:bg-orange-700 rounded-xl font-bold transition-colors">
+                บันทึก
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Import from GAS Modal */}
       {showImportModal && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50 overflow-y-auto">
