@@ -563,7 +563,7 @@ export default function Members() {
                   {group.map(m => (
                     <tr key={m.id} className="hover:bg-gray-50 transition-colors">
                       <td className="px-5 py-3">
-                        <p className="font-medium text-gray-800 text-sm">{m.name}</p>
+                        {(() => { const [fn, ...ln] = m.name.split(' '); return (<><p className="font-medium text-gray-800 text-sm">{fn}</p>{ln.length > 0 && <p className="font-medium text-gray-800 text-sm">{ln.join(' ')}</p>}</>); })()}
                         {m.empId && <p className="text-[10px] text-orange-500 font-mono">รหัส: {m.empId}</p>}
                         <p className="text-[10px] text-gray-400 font-mono">{m.uid}</p>
                       </td>
