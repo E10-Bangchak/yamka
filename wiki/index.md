@@ -20,3 +20,4 @@
 | 2026-05-02 | เชื่อมต่อ GAS สำเร็จ, เปิด Google Auth, ใส่ค่า EmailJS ครบ, Sync สมาชิก 18 คน, Deploy ล่าสุด |
 | 2026-05-02 | แก้ Firestore rules, แก้ email, เพิ่มฟีเจอร์ ขอแลกคืน (swap-back), Deploy แล้ว |
 | 2026-05-06 | Refactor ใหญ่: แยก TeamSchedule 2 โหมด (member/admin-edit), ย้าย ขอแลกคืน ไปป็น immediate reverse ใน popup, แปลง Requests เป็นหน้าประวัติ, แก้ bug green dot จาก reverse swaps, Deploy แล้ว |
+| 2026-05-07 | ขอแลกคืนต้องผ่านการอนุมัติ: แทน handleReverseSwapDirect ด้วย handleRequestReverse (addDoc pending), handleAction รองรับ isReverse สำหรับ swap/cover, badge "แลกคืน" ใน RequestCard, Deploy แล้ว |
