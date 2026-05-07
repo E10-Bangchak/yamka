@@ -225,7 +225,6 @@ export default function Dashboard({ member }: DashboardProps) {
           {[
             { code: 'A', label: 'ลาพักร้อน', quota: member.quotaA, used: totalA, bar: 'bg-red-400', barOver: 'bg-red-600', badge: 'bg-red-50 text-red-600' },
             { code: 'H', label: 'หยุดนักขัตฤกษ์', quota: member.quotaH, used: totalH, bar: 'bg-pink-400', barOver: 'bg-pink-600', badge: 'bg-pink-50 text-pink-600' },
-            { code: 'X', label: 'หยุดประจำ', quota: member.quotaX, used: totalX, bar: 'bg-gray-400', barOver: 'bg-gray-600', badge: 'bg-gray-50 text-gray-600' },
           ].map(({ code, label, quota, used, bar, barOver, badge }) => {
             const over = quota > 0 && used > quota;
             return (
@@ -248,6 +247,17 @@ export default function Dashboard({ member }: DashboardProps) {
               </div>
             );
           })}
+          {/* X: count only — runs from shift pattern, no quota */}
+          <div className="bg-white p-3 rounded-xl border border-gray-200 shadow-sm">
+            <div className="flex justify-between items-start mb-1">
+              <p className="text-[10px] uppercase font-bold text-gray-400">หยุดประจำ</p>
+              <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-gray-50 text-gray-500">X</span>
+            </div>
+            <p className="text-xl font-black text-gray-800">
+              {totalX} <span className="text-xs font-normal text-gray-400">วัน</span>
+            </p>
+            <p className="text-[10px] text-gray-400 mt-2">รันตามตารางกะ</p>
+          </div>
         </div>
       </div>
 
