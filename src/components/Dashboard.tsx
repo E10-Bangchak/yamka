@@ -217,7 +217,10 @@ export default function Dashboard({ member }: DashboardProps) {
 
       {/* Quota Summary */}
       <div className="space-y-2">
-        <p className="text-[10px] text-gray-400 font-medium">วันหยุดที่ใช้ไปแล้ว ปี {today.getFullYear()} (1 ม.ค. — วันนี้)</p>
+        <div className="flex flex-wrap gap-x-4 gap-y-0.5">
+          <p className="text-[10px] text-gray-400">A: รอบ 1 เม.ย. {fiscalBase} — 31 มี.ค. {fiscalBase + 1}</p>
+          <p className="text-[10px] text-gray-400">H: รอบ 1 ม.ค. — 31 ธ.ค. {calYear}</p>
+        </div>
         <div className="grid grid-cols-3 gap-3">
           {[
             { code: 'A', label: 'ลาพักร้อน', quota: member.quotaA, used: totalA, bar: 'bg-red-400', barOver: 'bg-red-600', badge: 'bg-red-50 text-red-600' },
