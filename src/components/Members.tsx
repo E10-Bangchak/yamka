@@ -1,8 +1,8 @@
-import React, { useState, useEffect } from 'react';
-import { collection, onSnapshot, doc, updateDoc, setDoc, getDoc, deleteDoc } from 'firebase/firestore';
+import React, { useState, useEffect, useMemo } from 'react';
+import { collection, onSnapshot, doc, updateDoc, setDoc, getDoc, deleteDoc, query, where } from 'firebase/firestore';
 import { db } from '../firebase';
-import { Member, ShiftPatternTemplate } from '../types';
-import { UserPlus, Edit2, Shield, User, Download, RefreshCw, Trash2, AlertTriangle, Repeat2, X as XIcon } from 'lucide-react';
+import { Member, ShiftPatternTemplate, Shift } from '../types';
+import { UserPlus, Edit2, Shield, User, Download, RefreshCw, Trash2, AlertTriangle, Repeat2, X as XIcon, CalendarDays } from 'lucide-react';
 import { toast } from 'sonner';
 import { format, differenceInDays, parseISO } from 'date-fns';
 import { th } from 'date-fns/locale';
