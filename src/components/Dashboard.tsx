@@ -201,24 +201,36 @@ export default function Dashboard({ member }: DashboardProps) {
       })()}
 
       {/* Quota Summary */}
-      <div className="grid grid-cols-3 gap-3">
-        {[
-          { code: 'A', label: 'ลาพักร้อน', quota: member.quotaA, used: totalA, bar: 'bg-red-400', badge: 'bg-red-50 text-red-600' },
-          { code: 'H', label: 'หยุดนักขัตฤกษ์', quota: member.quotaH, used: totalH, bar: 'bg-pink-400', badge: 'bg-pink-50 text-pink-600' },
-          { code: 'X', label: 'หยุดประจำ', quota: member.quotaX, used: totalX, bar: 'bg-gray-400', badge: 'bg-gray-50 text-gray-600' },
-        ].map(({ code, label, quota, used, bar, badge }) => (
-          <div key={code} className="bg-white p-3 rounded-xl border border-gray-200 shadow-sm">
-            <div className="flex justify-between items-start mb-1">
-              <p className="text-[10px] uppercase font-bold text-gray-400">{label}</p>
-              <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded ${badge}`}>{code} {quota}</span>
-            </div>
-            <p className="text-xl font-black text-gray-800">{used} <span className="text-xs font-normal text-gray-400">วัน</span></p>
-            <div className="mt-1 h-1 w-full bg-gray-100 rounded-full">
-              <div className={`h-full ${bar} rounded-full transition-all`} style={{ width: `${Math.min(100, (used / Math.max(1, quota)) * 100)}%` }} />
-            </div>
-            <p className="text-[10px] text-gray-400 mt-1">เหลือ {Math.max(0, quota - used)} วัน</p>
-          </div>
-        ))}
+      <div className="space-y-2">
+        <p className="text-[10px] text-gray-400 font-medium">วันหยุดที่ใช้ไปแล้ว ปี {today.getFullYear()} (1 ม.ค. — วันนี้)</p>
+        <div className="grid grid-cols-3 gap-3">
+          {[
+            { code: 'A', label: 'ลาพักร้อน', quota: member.quotaA, used: totalA, bar: 'bg-red-400', barOver: 'bg-red-600', badge: 'bg-red-50 text-red-600' },
+            { code: 'H', label: 'หยุดนักขัตฤกษ์', quota: member.quotaH, used: totalH, bar: 'bg-pink-400', barOver: 'bg-pink-600', badge: 'bg-pink-50 text-pink-600' },
+            { code: 'X', label: 'หยุดประจำ', quota: member.quotaX, used: totalX, bar: 'bg-gray-400', barOver: 'bg-gray-600', badge: 'bg-gray-50 text-gray-600' },
+          ].map(({ code, label, quota, used, bar, barOver, badge }) => {
+            const over = quota > 0 && used > quota;
+            return (
+              <div key={code} className={`bg-white p-3 rounded-xl border shadow-sm ${over ? 'border-red-300' : 'border-gray-200'}`}>
+                <div className="flex justify-between items-start mb-1">
+                  <p className="text-[10px] uppercase font-bold text-gray-400">{label}</p>
+                  <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded ${badge}`}>{code} {quota}</span>
+                </div>
+                <p className={`text-xl font-black ${over ? 'text-red-600' : 'text-gray-800'}`}>
+                  {used} <span className="text-xs font-normal text-gray-400">วัน</span>
+                </p>
+                <div className="mt-1 h-1.5 w-full bg-gray-100 rounded-full">
+                  <div className={`h-full ${over ? barOver : bar} rounded-full transition-all`}
+                    style={{ width: `${Math.min(100, (used / Math.max(1, quota)) * 100)}%` }} />
+                </div>
+                {over
+                  ? <p className="text-[10px] text-red-500 font-bold mt-1">⚠ เกิน {used - quota} วัน!</p>
+                  : <p className="text-[10px] text-gray-400 mt-1">เหลือ {Math.max(0, quota - used)} วัน</p>
+                }
+              </div>
+            );
+          })}
+        </div>
       </div>
 
       {/* 12-Month Calendars */}
