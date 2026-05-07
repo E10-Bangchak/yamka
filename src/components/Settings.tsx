@@ -157,26 +157,18 @@ export default function Settings({ member, setMember }: SettingsProps) {
     try {
       await deleteDoc(doc(db, 'shiftProperties', id));
       toast.success('ลบคุณสมบัติกะสำเร็จ');
-    } catch (e) {
-      toast.error('เกิดข้อผิดพลาด');
-    }
+    } catch { toast.error('เกิดข้อผิดพลาด'); }
   };
 
   const handleUpdate = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const formData = new FormData(e.currentTarget);
     const name = formData.get('name') as string;
-
     try {
-      await updateDoc(doc(db, 'members', member.id), {
-        name,
-        notificationPreferences: prefs
-      });
+      await updateDoc(doc(db, 'members', member.id), { name, notificationPreferences: prefs });
       setMember({ ...member, name, notificationPreferences: prefs });
       toast.success('บันทึกข้อมูลสำเร็จ');
-    } catch (error) {
-      toast.error('เกิดข้อผิดพลาด');
-    }
+    } catch { toast.error('เกิดข้อผิดพลาด'); }
   };
 
   const togglePref = (key: keyof NotificationPreferences) => {
@@ -184,385 +176,280 @@ export default function Settings({ member, setMember }: SettingsProps) {
   };
 
   return (
-    <div className="space-y-6">
-      <h2 className="text-2xl font-bold text-gray-800">ตั้งค่าส่วนตัว</h2>
+    <div className="space-y-4">
+      <h2 className="text-xl font-bold text-gray-800">ตั้งค่าส่วนตัว</h2>
 
-      <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6 max-w-2xl">
-        <form onSubmit={handleUpdate} className="space-y-6">
-          <div className="flex items-start space-x-4">
-            <div className="p-2 bg-orange-50 text-orange-600 rounded-lg">
-              <User size={20} />
+      {/* Personal info + notification */}
+      <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-4">
+        <form onSubmit={handleUpdate} className="space-y-5">
+
+          {/* Personal info */}
+          <div className="flex items-center gap-2 mb-1">
+            <div className="p-1.5 bg-orange-50 text-orange-600 rounded-lg"><User size={16} /></div>
+            <span className="text-sm font-bold text-gray-700">ข้อมูลส่วนตัว</span>
+          </div>
+          <div className="space-y-3">
+            <div>
+              <label className="block text-[10px] uppercase font-bold text-gray-400 mb-1">ชื่อ-นามสกุล</label>
+              <input name="name" defaultValue={member.name}
+                className="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm outline-none focus:ring-2 focus:ring-orange-500" />
             </div>
-            <div className="flex-1">
-              <label className="block text-sm font-bold text-gray-700 mb-1">ข้อมูลส่วนตัว</label>
-              <div className="space-y-3">
-                <div>
-                  <label className="block text-[10px] uppercase font-bold text-gray-400 mb-1">ชื่อ-นามสกุล</label>
-                  <input 
-                    name="name" 
-                    defaultValue={member.name} 
-                    className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-orange-500"
-                  />
-                </div>
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-[10px] uppercase font-bold text-gray-400 mb-1">สถานี</label>
-                    <input disabled value={member.station} className="w-full bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-500" />
-                  </div>
-                  <div>
-                    <label className="block text-[10px] uppercase font-bold text-gray-400 mb-1">โซน</label>
-                    <input disabled value={member.zone} className="w-full bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-500" />
-                  </div>
-                </div>
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label className="block text-[10px] uppercase font-bold text-gray-400 mb-1">สถานี</label>
+                <input disabled value={member.station}
+                  className="w-full bg-gray-50 border border-gray-200 rounded-xl px-3 py-2.5 text-sm text-gray-500" />
+              </div>
+              <div>
+                <label className="block text-[10px] uppercase font-bold text-gray-400 mb-1">โซน</label>
+                <input disabled value={member.zone}
+                  className="w-full bg-gray-50 border border-gray-200 rounded-xl px-3 py-2.5 text-sm text-gray-500" />
               </div>
             </div>
           </div>
 
-          <div className="flex items-start space-x-4">
-            <div className="p-2 bg-green-50 text-green-600 rounded-lg">
-              <Bell size={20} />
+          {/* Notification prefs */}
+          <div className="border-t border-gray-100 pt-4">
+            <div className="flex items-center gap-2 mb-3">
+              <div className="p-1.5 bg-green-50 text-green-600 rounded-lg"><Bell size={16} /></div>
+              <span className="text-sm font-bold text-gray-700">การแจ้งเตือนทางอีเมล</span>
             </div>
-            <div className="flex-1">
-              <label className="block text-sm font-bold text-gray-700 mb-1">การแจ้งเตือนทางอีเมล</label>
-              <p className="text-xs text-gray-500 mb-4">ระบบจะส่งอีเมลแจ้งเตือนตามที่ตั้งค่าไว้</p>
-
-              <div className="space-y-4">
-                <label className="block text-sm font-bold text-gray-700 mb-3">ตั้งค่าประเภทการแจ้งเตือน</label>
-
-                <div className="space-y-2">
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
-                    {[
-                      { key: 'newRequests', label: 'คำขอใหม่' },
-                      { key: 'requestStatus', label: 'สถานะคำขอ' },
-                      { key: 'warnings', label: 'คำเตือนกะ' }
-                    ].map((item) => (
-                      <button
-                        key={item.key}
-                        type="button"
-                        onClick={() => togglePref(item.key as keyof NotificationPreferences)}
-                        className={`flex items-center justify-between p-3 rounded-xl border transition-all ${prefs[item.key as keyof NotificationPreferences] ? 'bg-orange-50 border-orange-200' : 'bg-gray-50 border-gray-200'}`}
-                      >
-                        <span className={`text-xs font-medium ${prefs[item.key as keyof NotificationPreferences] ? 'text-orange-900' : 'text-gray-500'}`}>{item.label}</span>
-                        <div className={prefs[item.key as keyof NotificationPreferences] ? 'text-orange-600' : 'text-gray-400'}>
-                          {prefs[item.key as keyof NotificationPreferences] ? <CheckCircle2 size={16} /> : <XCircle size={16} />}
-                        </div>
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              </div>
+            <div className="grid grid-cols-3 gap-2">
+              {[
+                { key: 'newRequests', label: 'คำขอใหม่' },
+                { key: 'requestStatus', label: 'สถานะคำขอ' },
+                { key: 'warnings', label: 'คำเตือนกะ' },
+              ].map(item => {
+                const on = prefs[item.key as keyof NotificationPreferences];
+                return (
+                  <button key={item.key} type="button" onClick={() => togglePref(item.key as keyof NotificationPreferences)}
+                    className={`flex flex-col items-center gap-1 p-3 rounded-xl border transition-all ${on ? 'bg-orange-50 border-orange-200' : 'bg-gray-50 border-gray-200'}`}>
+                    <div className={on ? 'text-orange-600' : 'text-gray-400'}>
+                      {on ? <CheckCircle2 size={18} /> : <XCircle size={18} />}
+                    </div>
+                    <span className={`text-[10px] font-bold text-center leading-tight ${on ? 'text-orange-800' : 'text-gray-500'}`}>{item.label}</span>
+                  </button>
+                );
+              })}
             </div>
           </div>
 
-          <div className="pt-4 border-t border-gray-100 flex justify-end">
-            <button 
-              type="submit"
-              className="bg-orange-600 text-white px-8 py-2 rounded-lg font-bold hover:bg-orange-700 transition-colors"
-            >
-              บันทึกการเปลี่ยนแปลง
-            </button>
-          </div>
+          <button type="submit"
+            className="w-full bg-orange-600 text-white py-3 rounded-xl font-bold text-sm hover:bg-orange-700 transition-colors">
+            บันทึกการเปลี่ยนแปลง
+          </button>
         </form>
       </div>
 
+      {/* Admin section */}
       {member.role === 'admin' && (
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6 max-w-2xl">
+        <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-4 space-y-5">
+
           {auth.currentUser?.isAnonymous && (
-            <div className="flex items-center gap-2 bg-amber-50 border border-amber-200 text-amber-700 text-xs font-medium rounded-xl px-4 py-3 mb-6">
-              <AlertTriangle size={14} className="shrink-0" />
-              <span>คุณเข้าสู่ระบบด้วย PIN — ฟีเจอร์ Admin บางส่วนต้องการ <strong>เข้าสู่ระบบด้วย Google</strong> เพื่อแก้ไขข้อมูล</span>
+            <div className="flex items-start gap-2 bg-amber-50 border border-amber-200 text-amber-700 text-xs font-medium rounded-xl px-3 py-3">
+              <AlertTriangle size={14} className="shrink-0 mt-0.5" />
+              <span>เข้าสู่ระบบด้วย PIN — บางฟีเจอร์ต้องการ <strong>เข้าสู่ระบบด้วย Google</strong></span>
             </div>
           )}
+
           {/* GAS URL */}
-          <div className="flex items-start space-x-4 mb-6 pb-6 border-b border-gray-100">
-            <div className="p-2 bg-green-50 text-green-600 rounded-lg">
-              <Link size={20} />
-            </div>
-            <div className="flex-1">
-              <label className="block text-sm font-bold text-gray-700 mb-1">URL ของ GAS (Google Apps Script)</label>
-              <p className="text-xs text-gray-500 mb-3">ตั้งค่าครั้งเดียว ระบบจะดึงรายชื่อสมาชิกจาก GAS โดยอัตโนมัติ</p>
-              <div className="flex space-x-2">
-                <input
-                  type="url"
-                  value={gasUrl}
-                  onChange={e => setGasUrl(e.target.value)}
-                  placeholder="https://script.google.com/macros/s/xxx/exec"
-                  className="flex-1 border border-gray-200 rounded-lg px-3 py-2 text-xs font-mono outline-none focus:ring-2 focus:ring-green-500"
-                />
-                <button
-                  onClick={handleSaveGasUrl}
-                  disabled={gasUrlSaving}
-                  className="px-4 py-2 bg-green-600 text-white text-xs font-bold rounded-lg hover:bg-green-700 disabled:opacity-50 whitespace-nowrap"
-                >
-                  {gasUrlSaving ? 'กำลังบันทึก...' : 'บันทึก URL'}
-                </button>
+          <div>
+            <div className="flex items-center gap-2 mb-3">
+              <div className="p-1.5 bg-green-50 text-green-600 rounded-lg"><Link size={16} /></div>
+              <div>
+                <p className="text-sm font-bold text-gray-700">GAS URL (Google Apps Script)</p>
+                <p className="text-[10px] text-gray-400">ดึงรายชื่อสมาชิกจาก Employee Sheet</p>
               </div>
-              {gasUrl && (
-                <>
-                  <p className="text-[10px] text-green-600 mt-1">✓ ตั้งค่าแล้ว — หน้าจัดการสมาชิกจะใช้ URL นี้โดยอัตโนมัติ</p>
-                  <button
-                    onClick={handleSyncFromGas}
-                    disabled={syncing}
-                    className="mt-3 flex items-center space-x-2 px-4 py-2 bg-green-600 text-white text-xs font-bold rounded-lg hover:bg-green-700 disabled:opacity-50 transition-colors"
-                  >
-                    <RefreshCw size={14} className={syncing ? 'animate-spin' : ''} />
-                    <span>{syncing ? 'กำลัง Sync...' : 'Sync สมาชิกจาก GAS ทันที'}</span>
-                  </button>
-                  {syncResult && (
-                    <p className="text-[10px] text-green-700 mt-2 bg-green-50 px-3 py-1.5 rounded-lg border border-green-100">
-                      ✓ Sync เสร็จ — ใหม่ {syncResult.imported} คน · อัปเดต {syncResult.updated} คน
-                    </p>
-                  )}
-                </>
-              )}
             </div>
-          </div>
-
-          <div className="flex items-start space-x-4 mb-6">
-            <div className="p-2 bg-blue-50 text-blue-600 rounded-lg">
-              <SettingsIcon size={20} />
+            <div className="flex flex-col gap-2">
+              <input type="url" value={gasUrl} onChange={e => setGasUrl(e.target.value)}
+                placeholder="https://script.google.com/macros/s/xxx/exec"
+                className="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-xs font-mono outline-none focus:ring-2 focus:ring-green-500" />
+              <button onClick={handleSaveGasUrl} disabled={gasUrlSaving}
+                className="w-full py-2.5 bg-green-600 text-white text-sm font-bold rounded-xl hover:bg-green-700 disabled:opacity-50 transition-colors">
+                {gasUrlSaving ? 'กำลังบันทึก...' : 'บันทึก URL'}
+              </button>
             </div>
-            <div className="flex-1">
-              <div className="flex items-center justify-between mb-4">
-                <div>
-                  <label className="block text-sm font-bold text-gray-700">ทะเบียนรหัสกะ</label>
-                  <p className="text-xs text-gray-500">กำหนดชื่อ สี ช่วงเวลา และประเภทของแต่ละรหัสกะ</p>
-                </div>
-                <button onClick={handleSeedShiftProps}
-                  className="flex items-center gap-1.5 px-3 py-1.5 bg-gray-100 text-gray-600 text-xs font-bold rounded-lg hover:bg-gray-200 transition-colors">
-                  <Database size={13} />
-                  <span>Seed ค่าเริ่มต้น</span>
+            {gasUrl && (
+              <div className="mt-3 space-y-2">
+                <p className="text-[10px] text-green-600">✓ ตั้งค่าแล้ว</p>
+                <button onClick={handleSyncFromGas} disabled={syncing}
+                  className="w-full flex items-center justify-center gap-2 py-2.5 bg-green-600 text-white text-sm font-bold rounded-xl hover:bg-green-700 disabled:opacity-50 transition-colors">
+                  <RefreshCw size={14} className={syncing ? 'animate-spin' : ''} />
+                  {syncing ? 'กำลัง Sync...' : 'Sync สมาชิกจาก GAS'}
                 </button>
-              </div>
-
-              <div className="space-y-4">
-                {/* Add form */}
-                <div key={shiftFormKey} className="bg-gray-50 rounded-xl p-4 border border-gray-100 space-y-3">
-                  <p className="text-[10px] font-bold text-gray-500 uppercase">เพิ่มรหัสกะใหม่</p>
-                  <div className="grid grid-cols-2 gap-2">
-                    <div>
-                      <label className="block text-[10px] text-gray-400 mb-1">รหัสกะ</label>
-                      <input
-                        placeholder="เช่น S78"
-                        value={newShiftProp.id}
-                        onChange={e => setNewShiftProp(prev => ({ ...prev, id: e.target.value.toUpperCase() }))}
-                        className="w-full border border-gray-200 rounded-lg px-3 py-2 text-xs outline-none focus:ring-2 focus:ring-orange-500 font-mono"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-[10px] text-gray-400 mb-1">ชื่อเรียก</label>
-                      <input
-                        placeholder="เช่น กะเช้าเสริม"
-                        value={newShiftProp.name}
-                        onChange={e => setNewShiftProp(prev => ({ ...prev, name: e.target.value }))}
-                        className="w-full border border-gray-200 rounded-lg px-3 py-2 text-xs outline-none focus:ring-2 focus:ring-orange-500"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-[10px] text-gray-400 mb-1">กลุ่มกะ</label>
-                      <select
-                        value={newShiftProp.group || 'main'}
-                        onChange={e => setNewShiftProp(prev => ({ ...prev, group: e.target.value as ShiftGroup }))}
-                        className="w-full border border-gray-200 rounded-lg px-3 py-2 text-xs outline-none focus:ring-2 focus:ring-orange-500"
-                      >
-                        {SHIFT_GROUPS.map(g => (
-                          <option key={g.value} value={g.value}>{g.label}</option>
-                        ))}
-                      </select>
-                    </div>
-                    <div>
-                      <label className="block text-[10px] text-gray-400 mb-1">ช่วงเวลา</label>
-                      <select
-                        value={newShiftProp.timeSlot}
-                        onChange={e => setNewShiftProp(prev => ({ ...prev, timeSlot: e.target.value as ShiftTimeSlot }))}
-                        className="w-full border border-gray-200 rounded-lg px-3 py-2 text-xs outline-none focus:ring-2 focus:ring-orange-500"
-                      >
-                        <option value="morning">เช้า</option>
-                        <option value="afternoon">บ่าย</option>
-                        <option value="night">ดึก</option>
-                        <option value="rest">หยุด</option>
-                        <option value="holiday">วันหยุดนักขัตฤกษ์</option>
-                        <option value="leave">ลา</option>
-                      </select>
-                    </div>
-                    <div>
-                      <label className="block text-[10px] text-gray-400 mb-1">เวลาเข้างาน</label>
-                      <input
-                        type="text"
-                        inputMode="numeric"
-                        placeholder="06:00"
-                        maxLength={5}
-                        value={newShiftProp.startTime || ''}
-                        onChange={e => {
-                          let v = e.target.value.replace(/[^0-9]/g, '');
-                          if (v.length >= 3) v = v.slice(0, 2) + ':' + v.slice(2, 4);
-                          setNewShiftProp(prev => ({ ...prev, startTime: v }));
-                        }}
-                        className="w-full border border-gray-200 rounded-lg px-3 py-2 text-xs outline-none focus:ring-2 focus:ring-orange-500 font-mono"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-[10px] text-gray-400 mb-1">เวลาออกงาน</label>
-                      <input
-                        type="text"
-                        inputMode="numeric"
-                        placeholder="14:00"
-                        maxLength={5}
-                        value={newShiftProp.endTime || ''}
-                        onChange={e => {
-                          let v = e.target.value.replace(/[^0-9]/g, '');
-                          if (v.length >= 3) v = v.slice(0, 2) + ':' + v.slice(2, 4);
-                          setNewShiftProp(prev => ({ ...prev, endTime: v }));
-                        }}
-                        className="w-full border border-gray-200 rounded-lg px-3 py-2 text-xs outline-none focus:ring-2 focus:ring-orange-500 font-mono"
-                      />
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-3 flex-wrap">
-                    <div>
-                      <label className="block text-[10px] text-gray-400 mb-1">สี</label>
-                      <div className="flex items-center gap-2">
-                        <input
-                          type="color"
-                          value={newShiftProp.color}
-                          onChange={e => setNewShiftProp(prev => ({ ...prev, color: e.target.value }))}
-                          className="w-9 h-9 rounded-lg border border-gray-200 cursor-pointer p-0.5"
-                        />
-                        <span className="text-xs font-mono text-gray-500">{newShiftProp.color}</span>
-                      </div>
-                    </div>
-                    <label className="flex items-center gap-1.5 text-xs text-gray-600 cursor-pointer select-none">
-                      <input
-                        type="checkbox"
-                        checked={newShiftProp.isOvernight || false}
-                        onChange={e => setNewShiftProp(prev => ({ ...prev, isOvernight: e.target.checked }))}
-                        className="rounded"
-                      />
-                      กะข้ามวัน (ดึก)
-                    </label>
-                    <button
-                      onClick={handleAddShiftProp}
-                      className="ml-auto bg-orange-600 text-white rounded-lg px-4 py-2 text-xs font-bold flex items-center space-x-1 hover:bg-orange-700"
-                    >
-                      <Plus size={14} />
-                      <span>เพิ่ม</span>
-                    </button>
-                  </div>
-                </div>
-
-                {/* List grouped by category */}
-                {shiftProps.length === 0 ? (
-                  <p className="p-4 text-center text-xs text-gray-400 italic border border-dashed border-gray-200 rounded-xl">ยังไม่มีรหัสกะในระบบ</p>
-                ) : (
-                  <div className="space-y-3">
-                    {SHIFT_GROUPS.map(grp => {
-                      const items = shiftProps.filter(p => (p.group || (p.isMain ? 'main' : 'extra')) === grp.value);
-                      if (items.length === 0) return null;
-                      return (
-                        <div key={grp.value} className="border border-gray-100 rounded-xl overflow-hidden">
-                          <div className="px-3 py-2 flex items-center gap-2" style={{ backgroundColor: grp.color + '14' }}>
-                            <span className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: grp.color }} />
-                            <span className="text-[10px] font-bold uppercase" style={{ color: grp.color }}>{grp.label}</span>
-                            <span className="text-[9px] text-gray-400 ml-1">{items.length} รหัส</span>
-                          </div>
-                          <div className="divide-y divide-gray-50">
-                            {items.map(prop => (
-                              <div key={prop.id} className="px-3 py-2.5 hover:bg-gray-50 space-y-1.5">
-                                <div className="flex items-center gap-2">
-                                  <input
-                                    type="color"
-                                    defaultValue={prop.color || '#ea580c'}
-                                    onBlur={async e => {
-                                      if (e.target.value !== prop.color) {
-                                        try {
-                                          await setDoc(doc(db, 'shiftProperties', prop.id), { ...prop, color: e.target.value });
-                                          toast.success(`อัปเดตสี ${prop.id}`);
-                                        } catch { toast.error('เกิดข้อผิดพลาด'); }
-                                      }
-                                    }}
-                                    className="w-6 h-6 rounded-md border border-gray-200 cursor-pointer p-0 flex-shrink-0"
-                                  />
-                                  <span className="text-xs font-bold font-mono text-gray-700 w-16 shrink-0">{prop.id}</span>
-                                  <span className="text-xs text-gray-600 flex-1">{prop.name}</span>
-                                  <button
-                                    onClick={() => handleDeleteShiftProp(prop.id)}
-                                    className="p-1 text-gray-300 hover:text-red-500 transition-colors shrink-0"
-                                  >
-                                    <Trash2 size={14} />
-                                  </button>
-                                </div>
-                                {/* Time row — show only for work shifts (not rest/leave/holiday) */}
-                                {!['rest', 'leave', 'holiday'].includes(prop.timeSlot) && (
-                                  <div className="flex items-center gap-2 pl-8">
-                                    <span className="text-[10px] text-gray-400 w-12 shrink-0">เวลา</span>
-                                    <input
-                                      type="text"
-                                      inputMode="numeric"
-                                      placeholder="06:00"
-                                      maxLength={5}
-                                      defaultValue={prop.startTime || ''}
-                                      onChange={e => {
-                                        let v = e.target.value.replace(/[^0-9]/g, '');
-                                        if (v.length >= 3) v = v.slice(0, 2) + ':' + v.slice(2, 4);
-                                        e.target.value = v;
-                                      }}
-                                      onBlur={async e => {
-                                        if (e.target.value !== (prop.startTime || '')) {
-                                          try {
-                                            await setDoc(doc(db, 'shiftProperties', prop.id), { ...prop, startTime: e.target.value });
-                                            toast.success(`อัปเดตเวลาเข้า ${prop.id}`);
-                                          } catch { toast.error('เกิดข้อผิดพลาด'); }
-                                        }
-                                      }}
-                                      className="border border-gray-200 rounded px-2 py-1 text-[10px] outline-none focus:ring-1 focus:ring-orange-400 w-20 font-mono"
-                                    />
-                                    <span className="text-[10px] text-gray-400">–</span>
-                                    <input
-                                      type="text"
-                                      inputMode="numeric"
-                                      placeholder="14:00"
-                                      maxLength={5}
-                                      defaultValue={prop.endTime || ''}
-                                      onChange={e => {
-                                        let v = e.target.value.replace(/[^0-9]/g, '');
-                                        if (v.length >= 3) v = v.slice(0, 2) + ':' + v.slice(2, 4);
-                                        e.target.value = v;
-                                      }}
-                                      onBlur={async e => {
-                                        if (e.target.value !== (prop.endTime || '')) {
-                                          try {
-                                            await setDoc(doc(db, 'shiftProperties', prop.id), { ...prop, endTime: e.target.value });
-                                            toast.success(`อัปเดตเวลาออก ${prop.id}`);
-                                          } catch { toast.error('เกิดข้อผิดพลาด'); }
-                                        }
-                                      }}
-                                      className="border border-gray-200 rounded px-2 py-1 text-[10px] outline-none focus:ring-1 focus:ring-orange-400 w-20 font-mono"
-                                    />
-                                    <label className="flex items-center gap-1 text-[10px] text-gray-500 cursor-pointer select-none">
-                                      <input
-                                        type="checkbox"
-                                        defaultChecked={prop.isOvernight || false}
-                                        onChange={async e => {
-                                          try {
-                                            await setDoc(doc(db, 'shiftProperties', prop.id), { ...prop, isOvernight: e.target.checked });
-                                          } catch { toast.error('เกิดข้อผิดพลาด'); }
-                                        }}
-                                        className="rounded"
-                                      />
-                                      ข้ามวัน
-                                    </label>
-                                  </div>
-                                )}
-                              </div>
-                            ))}
-                          </div>
-                        </div>
-                      );
-                    })}
-                  </div>
+                {syncResult && (
+                  <p className="text-[10px] text-green-700 bg-green-50 px-3 py-2 rounded-xl border border-green-100">
+                    ✓ Sync เสร็จ — ใหม่ {syncResult.imported} คน · อัปเดต {syncResult.updated} คน
+                  </p>
                 )}
               </div>
+            )}
+          </div>
+
+          {/* Shift properties */}
+          <div className="border-t border-gray-100 pt-4">
+            <div className="flex items-center gap-2 mb-1">
+              <div className="p-1.5 bg-blue-50 text-blue-600 rounded-lg"><SettingsIcon size={16} /></div>
+              <p className="text-sm font-bold text-gray-700 flex-1">ทะเบียนรหัสกะ</p>
+              <button onClick={handleSeedShiftProps}
+                className="flex items-center gap-1 px-3 py-1.5 bg-gray-100 text-gray-600 text-xs font-bold rounded-lg hover:bg-gray-200 transition-colors">
+                <Database size={12} />Seed
+              </button>
             </div>
+            <p className="text-[10px] text-gray-400 mb-4 ml-9">กำหนดชื่อ สี ช่วงเวลา ของแต่ละรหัสกะ</p>
+
+            {/* Add form */}
+            <div key={shiftFormKey} className="bg-gray-50 rounded-xl p-3 border border-gray-100 space-y-3 mb-4">
+              <p className="text-[10px] font-bold text-gray-500 uppercase">เพิ่มรหัสกะใหม่</p>
+              <div className="grid grid-cols-2 gap-2">
+                <div>
+                  <label className="block text-[10px] text-gray-400 mb-1">รหัสกะ</label>
+                  <input placeholder="เช่น S78" value={newShiftProp.id}
+                    onChange={e => setNewShiftProp(prev => ({ ...prev, id: e.target.value.toUpperCase() }))}
+                    className="w-full border border-gray-200 rounded-lg px-3 py-2 text-xs outline-none focus:ring-2 focus:ring-orange-500 font-mono" />
+                </div>
+                <div>
+                  <label className="block text-[10px] text-gray-400 mb-1">ชื่อเรียก</label>
+                  <input placeholder="เช่น กะเช้าเสริม" value={newShiftProp.name}
+                    onChange={e => setNewShiftProp(prev => ({ ...prev, name: e.target.value }))}
+                    className="w-full border border-gray-200 rounded-lg px-3 py-2 text-xs outline-none focus:ring-2 focus:ring-orange-500" />
+                </div>
+                <div>
+                  <label className="block text-[10px] text-gray-400 mb-1">กลุ่มกะ</label>
+                  <select value={newShiftProp.group || 'main'}
+                    onChange={e => setNewShiftProp(prev => ({ ...prev, group: e.target.value as ShiftGroup }))}
+                    className="w-full border border-gray-200 rounded-lg px-3 py-2 text-xs outline-none focus:ring-2 focus:ring-orange-500">
+                    {SHIFT_GROUPS.map(g => <option key={g.value} value={g.value}>{g.label}</option>)}
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-[10px] text-gray-400 mb-1">ช่วงเวลา</label>
+                  <select value={newShiftProp.timeSlot}
+                    onChange={e => setNewShiftProp(prev => ({ ...prev, timeSlot: e.target.value as ShiftTimeSlot }))}
+                    className="w-full border border-gray-200 rounded-lg px-3 py-2 text-xs outline-none focus:ring-2 focus:ring-orange-500">
+                    <option value="morning">เช้า</option>
+                    <option value="afternoon">บ่าย</option>
+                    <option value="night">ดึก</option>
+                    <option value="rest">หยุด</option>
+                    <option value="holiday">วันหยุดนักขัตฤกษ์</option>
+                    <option value="leave">ลา</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-[10px] text-gray-400 mb-1">เวลาเข้างาน</label>
+                  <input type="text" inputMode="numeric" placeholder="06:00" maxLength={5}
+                    value={newShiftProp.startTime || ''}
+                    onChange={e => { let v = e.target.value.replace(/[^0-9]/g, ''); if (v.length >= 3) v = v.slice(0, 2) + ':' + v.slice(2, 4); setNewShiftProp(prev => ({ ...prev, startTime: v })); }}
+                    className="w-full border border-gray-200 rounded-lg px-3 py-2 text-xs outline-none focus:ring-2 focus:ring-orange-500 font-mono" />
+                </div>
+                <div>
+                  <label className="block text-[10px] text-gray-400 mb-1">เวลาออกงาน</label>
+                  <input type="text" inputMode="numeric" placeholder="14:00" maxLength={5}
+                    value={newShiftProp.endTime || ''}
+                    onChange={e => { let v = e.target.value.replace(/[^0-9]/g, ''); if (v.length >= 3) v = v.slice(0, 2) + ':' + v.slice(2, 4); setNewShiftProp(prev => ({ ...prev, endTime: v })); }}
+                    className="w-full border border-gray-200 rounded-lg px-3 py-2 text-xs outline-none focus:ring-2 focus:ring-orange-500 font-mono" />
+                </div>
+              </div>
+              <div className="flex items-center gap-3">
+                <div className="flex items-center gap-2">
+                  <label className="text-[10px] text-gray-400">สี</label>
+                  <input type="color" value={newShiftProp.color}
+                    onChange={e => setNewShiftProp(prev => ({ ...prev, color: e.target.value }))}
+                    className="w-8 h-8 rounded-lg border border-gray-200 cursor-pointer p-0.5" />
+                </div>
+                <label className="flex items-center gap-1.5 text-xs text-gray-600 cursor-pointer select-none flex-1">
+                  <input type="checkbox" checked={newShiftProp.isOvernight || false}
+                    onChange={e => setNewShiftProp(prev => ({ ...prev, isOvernight: e.target.checked }))}
+                    className="rounded" />
+                  กะข้ามวัน
+                </label>
+                <button onClick={handleAddShiftProp}
+                  className="bg-orange-600 text-white rounded-lg px-4 py-2 text-xs font-bold flex items-center gap-1 hover:bg-orange-700">
+                  <Plus size={14} />เพิ่ม
+                </button>
+              </div>
+            </div>
+
+            {/* Shift list */}
+            {shiftProps.length === 0 ? (
+              <p className="p-4 text-center text-xs text-gray-400 italic border border-dashed border-gray-200 rounded-xl">ยังไม่มีรหัสกะในระบบ</p>
+            ) : (
+              <div className="space-y-3">
+                {SHIFT_GROUPS.map(grp => {
+                  const items = shiftProps.filter(p => (p.group || (p.isMain ? 'main' : 'extra')) === grp.value);
+                  if (items.length === 0) return null;
+                  return (
+                    <div key={grp.value} className="border border-gray-100 rounded-xl overflow-hidden">
+                      <div className="px-3 py-2 flex items-center gap-2" style={{ backgroundColor: grp.color + '14' }}>
+                        <span className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: grp.color }} />
+                        <span className="text-[10px] font-bold uppercase" style={{ color: grp.color }}>{grp.label}</span>
+                        <span className="text-[9px] text-gray-400 ml-1">{items.length} รหัส</span>
+                      </div>
+                      <div className="divide-y divide-gray-50">
+                        {items.map(prop => (
+                          <div key={prop.id} className="px-3 py-3 space-y-2">
+                            {/* Name row */}
+                            <div className="flex items-center gap-2">
+                              <input type="color" defaultValue={prop.color || '#ea580c'}
+                                onBlur={async e => {
+                                  if (e.target.value !== prop.color) {
+                                    try { await setDoc(doc(db, 'shiftProperties', prop.id), { ...prop, color: e.target.value }); toast.success(`อัปเดตสี ${prop.id}`); }
+                                    catch { toast.error('เกิดข้อผิดพลาด'); }
+                                  }
+                                }}
+                                className="w-6 h-6 rounded border border-gray-200 cursor-pointer p-0 shrink-0" />
+                              <span className="text-xs font-bold font-mono text-gray-700 w-14 shrink-0">{prop.id}</span>
+                              <span className="text-xs text-gray-600 flex-1 truncate">{prop.name}</span>
+                              <button onClick={() => handleDeleteShiftProp(prop.id)}
+                                className="p-1 text-gray-300 hover:text-red-500 transition-colors shrink-0">
+                                <Trash2 size={14} />
+                              </button>
+                            </div>
+                            {/* Time row — work shifts only */}
+                            {!['rest', 'leave', 'holiday'].includes(prop.timeSlot) && (
+                              <div className="flex items-center gap-2 flex-wrap">
+                                <span className="text-[10px] text-gray-400 shrink-0">เวลา</span>
+                                <input type="text" inputMode="numeric" placeholder="06:00" maxLength={5}
+                                  defaultValue={prop.startTime || ''}
+                                  onChange={e => { let v = e.target.value.replace(/[^0-9]/g, ''); if (v.length >= 3) v = v.slice(0, 2) + ':' + v.slice(2, 4); e.target.value = v; }}
+                                  onBlur={async e => {
+                                    if (e.target.value !== (prop.startTime || '')) {
+                                      try { await setDoc(doc(db, 'shiftProperties', prop.id), { ...prop, startTime: e.target.value }); toast.success(`อัปเดตเวลาเข้า ${prop.id}`); }
+                                      catch { toast.error('เกิดข้อผิดพลาด'); }
+                                    }
+                                  }}
+                                  className="border border-gray-200 rounded-lg px-2 py-1.5 text-[11px] outline-none focus:ring-1 focus:ring-orange-400 w-20 font-mono" />
+                                <span className="text-[10px] text-gray-400">–</span>
+                                <input type="text" inputMode="numeric" placeholder="14:00" maxLength={5}
+                                  defaultValue={prop.endTime || ''}
+                                  onChange={e => { let v = e.target.value.replace(/[^0-9]/g, ''); if (v.length >= 3) v = v.slice(0, 2) + ':' + v.slice(2, 4); e.target.value = v; }}
+                                  onBlur={async e => {
+                                    if (e.target.value !== (prop.endTime || '')) {
+                                      try { await setDoc(doc(db, 'shiftProperties', prop.id), { ...prop, endTime: e.target.value }); toast.success(`อัปเดตเวลาออก ${prop.id}`); }
+                                      catch { toast.error('เกิดข้อผิดพลาด'); }
+                                    }
+                                  }}
+                                  className="border border-gray-200 rounded-lg px-2 py-1.5 text-[11px] outline-none focus:ring-1 focus:ring-orange-400 w-20 font-mono" />
+                                <label className="flex items-center gap-1 text-[10px] text-gray-500 cursor-pointer select-none">
+                                  <input type="checkbox" defaultChecked={prop.isOvernight || false}
+                                    onChange={async e => {
+                                      try { await setDoc(doc(db, 'shiftProperties', prop.id), { ...prop, isOvernight: e.target.checked }); }
+                                      catch { toast.error('เกิดข้อผิดพลาด'); }
+                                    }}
+                                    className="rounded" />
+                                  ข้ามวัน
+                                </label>
+                              </div>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
           </div>
         </div>
       )}
