@@ -57,6 +57,15 @@
 - **ประวัติการทำรายการ** — 60 รายการล่าสุด: approved/reversed/rejected/cancelled
 - 8 Firestore listeners, มี error callback ทุกตัว
 
+### ระบบโควตาวันหยุด
+- tab "โควตาวันหยุด" ใน Members page แสดงทุกคนแบ่งตามตำแหน่ง
+- **รอบนับ**: H = 1 ม.ค.–31 ธ.ค. (ปีปฏิทิน), A = 1 เม.ย.–31 มี.ค. ปีถัดไป (ปีงบประมาณ)
+- `initialUsedA` / `initialUsedH` — วันที่ใช้ก่อนเข้าระบบ, บันทึกใน Firestore member doc
+- **totalUsed = initialUsed + systemUsed** (จาก Firestore shifts จริง ช่วง rangeStart–วันนี้)
+- Quota card แสดง: ตัวเลขรวม, breakdown "ก่อนระบบ: X · ระบบ: Y" (ถ้า initialUsed > 0), แถบ progress, "เหลือ N วัน" หรือ "เกิน N วัน" สีแดง
+- Quota edit modal: 2×2 grid — โควตา A | A ก่อนเข้าระบบ | โควตา H | H ก่อนเข้าระบบ
+- Dashboard quota warning ใช้สูตรเดียวกัน (totalA/H เทียบ quota)
+
 ### Bug Fixes สำคัญ
 - **Green dot จาก reverse swaps**: `approvedSwaps` filter ออก swaps ที่มี `isReverseOf` — reverse swap requests ไม่ควรแสดง green dot
 - **handleAction + isReverse**: approve reverse swap → status = `'reversed'` ไม่ใช่ `'approved'`
