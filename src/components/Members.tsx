@@ -550,29 +550,35 @@ export default function Members() {
                 <span className="text-sm font-bold text-gray-700">{station}</span>
                 <span className="ml-auto text-[10px] text-gray-400">{group.length} คน</span>
               </div>
-              <table className="w-full text-left">
+              <table className="w-full text-left table-fixed">
+                <colgroup>
+                  <col className="w-[55%]" />
+                  <col className="w-[20%]" />
+                  <col className="w-[16%]" />
+                  <col className="w-[9%]" />
+                </colgroup>
                 <thead className="bg-white border-b border-gray-100">
                   <tr>
-                    <th className="px-5 py-3 text-[10px] font-bold text-gray-400 uppercase">ชื่อ-นามสกุล</th>
-                    <th className="px-5 py-3 text-[10px] font-bold text-gray-400 uppercase">ตำแหน่ง</th>
-                    <th className="px-5 py-3 text-[10px] font-bold text-gray-400 uppercase">สิทธิ์</th>
-                    <th className="px-5 py-3 text-[10px] font-bold text-gray-400 uppercase text-right">จัดการ</th>
+                    <th className="px-4 py-3 text-[10px] font-bold text-gray-400 uppercase">ชื่อ-นามสกุล</th>
+                    <th className="px-2 py-3 text-[10px] font-bold text-gray-400 uppercase">ตำแหน่ง</th>
+                    <th className="px-2 py-3 text-[10px] font-bold text-gray-400 uppercase">สิทธิ์</th>
+                    <th className="px-2 py-3 text-[10px] font-bold text-gray-400 uppercase text-right">จัดการ</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-50">
                   {group.map(m => (
                     <tr key={m.id} className="hover:bg-gray-50 transition-colors">
-                      <td className="px-5 py-3">
+                      <td className="px-4 py-3">
                         {(() => { const [fn, ...ln] = m.name.split(' '); return (<><p className="font-medium text-gray-800 text-sm">{fn}</p>{ln.length > 0 && <p className="font-medium text-gray-800 text-sm">{ln.join(' ')}</p>}</>); })()}
                         {m.empId && <p className="text-[10px] text-orange-500 font-mono">รหัส: {m.empId}</p>}
                         <p className="text-[10px] text-gray-400 font-mono">{m.uid}</p>
                       </td>
-                      <td className="px-5 py-3">
+                      <td className="px-2 py-3">
                         <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold border ${posBadge(m.position)}`}>
                           {normalize(m.position) || '—'}
                         </span>
                       </td>
-                      <td className="px-5 py-3">
+                      <td className="px-2 py-3">
                         <button onClick={() => toggleRole(m)}
                           className={`flex items-center space-x-1 px-2 py-1 rounded-full text-[10px] font-bold uppercase border ${
                             m.role === 'admin' ? 'bg-orange-50 text-orange-600 border-orange-200' : 'bg-gray-50 text-gray-500 border-gray-200'
