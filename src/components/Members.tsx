@@ -447,9 +447,13 @@ export default function Members() {
                   </div>
                   <div className="divide-y divide-gray-50">
                     {group.map(m => {
-                      const usage = usageMap.get(m.id) || { A: 0, H: 0 };
-                      const overA = usage.A > m.quotaA;
-                      const overH = usage.H > m.quotaH;
+                      const sysUsage = usageMap.get(m.id) || { A: 0, H: 0 };
+                      const initA = m.initialUsedA || 0;
+                      const initH = m.initialUsedH || 0;
+                      const totalA = initA + sysUsage.A;
+                      const totalH = initH + sysUsage.H;
+                      const overA = totalA > m.quotaA;
+                      const overH = totalH > m.quotaH;
                       return (
                         <div key={m.id} className="px-4 py-3 flex items-start gap-4">
                           <div className="flex-1 min-w-0">
@@ -458,29 +462,35 @@ export default function Members() {
                           </div>
 
                           {/* A quota */}
-                          <div className="w-24 shrink-0">
+                          <div className="w-28 shrink-0">
                             <div className="flex items-center justify-between">
                               <span className="text-[10px] font-bold text-red-500 uppercase">A</span>
                               {overA && <span className="text-[9px] font-bold text-red-600 bg-red-50 px-1 rounded">เกิน!</span>}
                             </div>
                             <p className={`text-sm font-black leading-tight ${overA ? 'text-red-600' : 'text-gray-800'}`}>
-                              {usage.A}<span className="text-[10px] font-normal text-gray-400">/{m.quotaA}</span>
+                              {totalA}<span className="text-[10px] font-normal text-gray-400">/{m.quotaA}</span>
                             </p>
-                            <QuotaBar used={usage.A} quota={m.quotaA} colorUsed="bg-red-400" colorOver="bg-red-600" />
-                            <p className="text-[9px] text-gray-400 mt-0.5">เหลือ {Math.max(0, m.quotaA - usage.A)} วัน</p>
+                            {initA > 0 && <p className="text-[9px] text-gray-400">ก่อนระบบ: {initA} · ระบบ: {sysUsage.A}</p>}
+                            <QuotaBar used={totalA} quota={m.quotaA} colorUsed="bg-red-400" colorOver="bg-red-600" />
+                            {overA
+                              ? <p className="text-[9px] text-red-500 font-bold mt-0.5">เกิน {totalA - m.quotaA} วัน</p>
+                              : <p className="text-[9px] text-gray-400 mt-0.5">เหลือ {m.quotaA - totalA} วัน</p>}
                           </div>
 
                           {/* H quota */}
-                          <div className="w-24 shrink-0">
+                          <div className="w-28 shrink-0">
                             <div className="flex items-center justify-between">
                               <span className="text-[10px] font-bold text-pink-500 uppercase">H</span>
                               {overH && <span className="text-[9px] font-bold text-pink-600 bg-pink-50 px-1 rounded">เกิน!</span>}
                             </div>
                             <p className={`text-sm font-black leading-tight ${overH ? 'text-pink-600' : 'text-gray-800'}`}>
-                              {usage.H}<span className="text-[10px] font-normal text-gray-400">/{m.quotaH}</span>
+                              {totalH}<span className="text-[10px] font-normal text-gray-400">/{m.quotaH}</span>
                             </p>
-                            <QuotaBar used={usage.H} quota={m.quotaH} colorUsed="bg-pink-400" colorOver="bg-pink-600" />
-                            <p className="text-[9px] text-gray-400 mt-0.5">เหลือ {Math.max(0, m.quotaH - usage.H)} วัน</p>
+                            {initH > 0 && <p className="text-[9px] text-gray-400">ก่อนระบบ: {initH} · ระบบ: {sysUsage.H}</p>}
+                            <QuotaBar used={totalH} quota={m.quotaH} colorUsed="bg-pink-400" colorOver="bg-pink-600" />
+                            {overH
+                              ? <p className="text-[9px] text-pink-500 font-bold mt-0.5">เกิน {totalH - m.quotaH} วัน</p>
+                              : <p className="text-[9px] text-gray-400 mt-0.5">เหลือ {m.quotaH - totalH} วัน</p>}
                           </div>
 
                           {/* Edit quota button */}
