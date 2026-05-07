@@ -15,8 +15,9 @@ interface DashboardProps {
 
 export default function Dashboard({ member }: DashboardProps) {
   const today = new Date();
-  const rangeStart = startOfMonth(today);
+  const rangeStart = startOfYear(today);       // Jan 1 of current year
   const rangeEnd = endOfMonth(addMonths(today, 11));
+  const calendarStart = startOfMonth(today);   // calendar still shows from this month
 
   const { getShiftStyle } = useShiftProperties();
   const [shifts, setShifts] = useState<Shift[]>([]);
