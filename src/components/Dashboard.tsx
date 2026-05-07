@@ -122,11 +122,19 @@ export default function Dashboard({ member }: DashboardProps) {
     } catch { toast.error('เกิดข้อผิดพลาด'); }
   };
 
-  // Quota: count only Firestore-stored A/H shifts from Jan 1 to today (actual used, not projected)
   const todayStr = format(today, 'yyyy-MM-dd');
-  const totalA = shifts.filter(s => s.shiftCode === 'A' && s.date <= todayStr).length;
-  const totalH = shifts.filter(s => s.shiftCode === 'H' && s.date <= todayStr).length;
-  // X count from pattern over displayed calendar (informational only)
+  // H: calendar year Jan 1–Dec 31 (actual used in Firestore, up to today)
+  const hStart = `${calYear}-01-01`;
+  const hEnd   = `${calYear}-12-31`;
+  const countH = shifts.filter(s => s.shiftCode === 'H' && s.date >= hStart && s.date <= todayStr).length;
+  // A: fiscal year Apr 1–Mar 31 next year (actual used in Firestore, up to today)
+  const aStart = `${fiscalBase}-04-01`;
+  const aEnd   = `${fiscalBase + 1}-03-31`;
+  const countA = shifts.filter(s => s.shiftCode === 'A' && s.date >= aStart && s.date <= todayStr).length;
+  // Total used = before-system + in-system
+  const totalA = (member.initialUsedA || 0) + countA;
+  const totalH = (member.initialUsedH || 0) + countH;
+  // X: informational, count from calendar display
   const calDays = eachDayOfInterval({ start: calendarStart, end: rangeEnd });
   const totalX = calDays.filter(d => getShift(format(d, 'yyyy-MM-dd')).code === 'X').length;
 
