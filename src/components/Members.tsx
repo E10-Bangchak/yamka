@@ -428,9 +428,9 @@ export default function Members() {
 
         return (
           <div className="space-y-4">
-            <div className="flex items-center gap-2 text-xs text-gray-400">
-              <CalendarDays size={12} />
-              <span>นับจากกะที่บันทึกจริง ปี {currentYear} (1 ม.ค. — วันนี้)</span>
+            <div className="flex flex-col gap-0.5 text-[10px] text-gray-400">
+              <span className="flex items-center gap-1"><CalendarDays size={10} />A: 1 เม.ย. {fiscalBase} — 31 มี.ค. {fiscalBase + 1}</span>
+              <span className="flex items-center gap-1"><CalendarDays size={10} />H: 1 ม.ค. — 31 ธ.ค. {currentYear}</span>
               {quotaLoading && <span className="text-orange-500">กำลังโหลด...</span>}
             </div>
 
