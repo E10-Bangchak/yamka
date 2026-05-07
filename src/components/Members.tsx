@@ -818,39 +818,21 @@ export default function Members() {
                 </div>
               </div>
 
-              <div className="space-y-2">
-                <div className="grid grid-cols-3 gap-4">
-                  <div>
-                    <label className="block text-xs font-bold text-gray-500 uppercase mb-1">โควตา A</label>
-                    <input type="number" name="quotaA" defaultValue={editingMember?.quotaA ?? 0} required
-                      className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-orange-500" />
-                  </div>
-                  <div>
-                    <label className="block text-xs font-bold text-gray-500 uppercase mb-1">โควตา H</label>
-                    <input type="number" name="quotaH" defaultValue={editingMember?.quotaH ?? 0} required
-                      className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-orange-500" />
-                  </div>
-                  <div>
-                    <label className="block text-xs font-bold text-gray-500 uppercase mb-1">โควตา X</label>
-                    <input type="number" name="quotaX" defaultValue={editingMember?.quotaX ?? 4} required
-                      className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-orange-500" />
-                  </div>
+              <div className="grid grid-cols-3 gap-4">
+                <div>
+                  <label className="block text-xs font-bold text-gray-500 uppercase mb-1">โควตา A</label>
+                  <input type="number" name="quotaA" defaultValue={editingMember?.quotaA ?? 0} required
+                    className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-orange-500" />
                 </div>
-                <div className="bg-gray-50 rounded-xl p-3 border border-gray-100">
-                  <p className="text-[10px] font-bold text-gray-400 uppercase mb-2">วันหยุดที่ใช้ไปก่อนเข้าระบบ</p>
-                  <div className="grid grid-cols-2 gap-3">
-                    <div>
-                      <label className="block text-[10px] font-bold text-red-500 mb-1">A — ลาพักร้อน</label>
-                      <input type="number" name="initialUsedA" min={0} defaultValue={editingMember?.initialUsedA ?? 0}
-                        className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-red-300 bg-white" />
-                    </div>
-                    <div>
-                      <label className="block text-[10px] font-bold text-pink-500 mb-1">H — หยุดนักขัตฤกษ์</label>
-                      <input type="number" name="initialUsedH" min={0} defaultValue={editingMember?.initialUsedH ?? 0}
-                        className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-pink-300 bg-white" />
-                    </div>
-                  </div>
-                  <p className="text-[9px] text-gray-400 mt-1.5">จำนวนวันที่ใช้ไปก่อนเริ่มใช้งานระบบนี้ — ระบบจะนำมารวมคำนวณโควตาคงเหลือ</p>
+                <div>
+                  <label className="block text-xs font-bold text-gray-500 uppercase mb-1">โควตา H</label>
+                  <input type="number" name="quotaH" defaultValue={editingMember?.quotaH ?? 0} required
+                    className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-orange-500" />
+                </div>
+                <div>
+                  <label className="block text-xs font-bold text-gray-500 uppercase mb-1">โควตา X</label>
+                  <input type="number" name="quotaX" defaultValue={editingMember?.quotaX ?? 4} required
+                    className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-orange-500" />
                 </div>
               </div>
 
