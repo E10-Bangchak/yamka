@@ -894,16 +894,16 @@ export default function TeamSchedule({ member, isAdmin, memberMode = false }: Te
                   </button>
                 ) : (
                   <div className="space-y-2">
-                    <p className="text-xs text-center text-gray-600 font-medium">คืนกะเดิมของทั้งสองฝ่ายใช่ไหม?</p>
+                    <p className="text-xs text-center text-gray-600 font-medium">ส่งคำขอแลกคืนให้คู่แลกอนุมัติ?</p>
                     <div className="flex gap-2">
                       <button onClick={() => setConfirmReverse(false)}
                         className="flex-1 py-2 text-sm text-gray-500 bg-gray-100 hover:bg-gray-200 rounded-lg font-medium transition-colors">
                         ยกเลิก
                       </button>
-                      <button onClick={() => handleReverseSwapDirect(swapDetail)}
+                      <button onClick={() => handleRequestReverse(swapDetail)}
                         disabled={reversing}
                         className="flex-1 py-2 text-sm text-white bg-blue-600 hover:bg-blue-700 rounded-lg font-bold transition-colors disabled:opacity-60">
-                        {reversing ? 'กำลังคืน...' : 'ยืนยัน'}
+                        {reversing ? 'กำลังส่ง...' : 'ยืนยัน'}
                       </button>
                     </div>
                   </div>
