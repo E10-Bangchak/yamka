@@ -11,10 +11,14 @@
             "id": "77c99a3453a15b93",
             "type": "leaf",
             "state": {
-              "type": "graph",
-              "state": {},
-              "icon": "lucide-git-fork",
-              "title": "มุมมองกราฟ"
+              "type": "markdown",
+              "state": {
+                "file": "CLAUDE.md",
+                "mode": "source",
+                "source": false
+              },
+              "icon": "lucide-file",
+              "title": "CLAUDE"
             }
           }
         ]
@@ -178,6 +182,21 @@
   },
   "active": "77c99a3453a15b93",
   "lastOpenFiles": [
+    "firebase-debug.log",
+    "dist/workbox-8c29f6e4.js",
+    "dist/sw.js",
+    "dist/index.html",
+    "dist/registerSW.js",
+    "dist/manifest.webmanifest",
+    "dist/assets/index-DfIdAivL.css",
+    "dist/assets/index-DEqImzNo.js",
+    "dist/assets",
+    "wiki/project-status.md",
+    "wiki/index.md",
+    "wiki/deploy-guide.md",
+    "wiki/components.md",
+    "wiki/architecture.md",
+    "node_modules/ipaddr.js/README.md",
     "HANDOFF_YAMKA_DEPLOY.md"
   ]
 }
