@@ -489,7 +489,7 @@ export default function Members() {
                           </div>
 
                           {/* H quota */}
-                          <div className="w-28 shrink-0">
+                          <div className="w-[30%] shrink-0">
                             <div className="flex items-center justify-between">
                               <span className="text-[10px] font-bold text-pink-500 uppercase">H</span>
                               {overH && <span className="text-[9px] font-bold text-pink-600 bg-pink-50 px-1 rounded">เกิน!</span>}
