@@ -587,7 +587,7 @@ export default function Members() {
                           <span>{m.role}</span>
                         </button>
                       </td>
-                      <td className="px-5 py-3 text-right">
+                      <td className="px-2 py-3 text-right">
                         <button onClick={() => openModal(m)} className="p-2 text-gray-400 hover:text-orange-600 transition-colors">
                           <Edit2 size={18} />
                         </button>
