@@ -583,7 +583,7 @@ export default function Members() {
       {/* Quota Edit Modal */}
       {editingQuota && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
-          <div className="bg-white w-full max-w-xs rounded-2xl p-6 shadow-2xl">
+          <div className="bg-white w-full max-w-sm rounded-2xl p-6 shadow-2xl">
             <div className="flex items-center justify-between mb-4">
               <div>
                 <h3 className="text-base font-bold text-gray-800">แก้ไขโควตาวันหยุด</h3>
