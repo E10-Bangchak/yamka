@@ -485,7 +485,7 @@ export default function Members() {
 
                           {/* Edit quota button */}
                           <button
-                            onClick={() => { setEditingQuota(m); setQuotaValues({ quotaA: m.quotaA, quotaH: m.quotaH }); }}
+                            onClick={() => { setEditingQuota(m); setQuotaValues({ quotaA: m.quotaA, quotaH: m.quotaH, initialUsedA: m.initialUsedA || 0, initialUsedH: m.initialUsedH || 0 }); }}
                             className="p-1.5 text-gray-300 hover:text-orange-500 transition-colors shrink-0 mt-0.5">
                             <Edit2 size={14} />
                           </button>
