@@ -15,9 +15,16 @@ interface DashboardProps {
 
 export default function Dashboard({ member }: DashboardProps) {
   const today = new Date();
-  const rangeStart = startOfYear(today);       // Jan 1 of current year
+  // H: calendar year Jan 1–Dec 31
+  // A: fiscal year Apr 1–Mar 31 (next year)
+  const calYear = today.getFullYear();
+  const fiscalBase = today.getMonth() >= 3 ? calYear : calYear - 1; // Apr=3 in JS
+  // Fetch from earliest period start to cover both H and A
+  const rangeStart = today.getMonth() >= 3
+    ? startOfYear(today)                      // Apr-Dec: Jan 1 covers both
+    : new Date(fiscalBase, 3, 1);             // Jan-Mar: need Apr 1 of last year for A
   const rangeEnd = endOfMonth(addMonths(today, 11));
-  const calendarStart = startOfMonth(today);   // calendar still shows from this month
+  const calendarStart = startOfMonth(today);
 
   const { getShiftStyle } = useShiftProperties();
   const [shifts, setShifts] = useState<Shift[]>([]);
