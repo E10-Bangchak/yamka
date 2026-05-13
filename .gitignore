@@ -7,3 +7,9 @@ coverage/
 .env*
 !.env.example
 .firebase/
+
+# Migration scripts — DO NOT COMMIT
+scripts/old-service-account.json
+scripts/new-service-account.json
+scripts/migration-data/
+scripts/uid-map.json
